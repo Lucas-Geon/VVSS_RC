@@ -189,7 +189,7 @@
         }
 
         .wave-container {
-            flex: 1 1 0;      
+            flex: 1 1 0;     
             min-height: 0;    
             position: relative;
             border-bottom: 1px dashed rgba(255, 255, 255, 0.15); 
@@ -1390,24 +1390,30 @@
             checkAutoAlarms();
         });
 
-        // 🟢 [RC 시나리오 프리셋]
+        // 🟢 [RC 시나리오 프리셋] - 모든 프리셋 DBP Sync 적용
         function applyRCPreset(presetKey) {
             const presets = {
-                '1-1': { sys: 124, dia: 76, hr: 60, spo2: 98,  etco2: 42, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '1-2': { sys: 124, dia: 76, hr: 60, spo2: 100, etco2: 35, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '2-1': { sys: 75,  dia: 43, hr: 62, spo2: 100, etco2: 31, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '2-2': { sys: 102, dia: 68, hr: 75, spo2: 100, etco2: 33, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '3-1': { sys: 81,  dia: 53, hr: 75, spo2: 100, etco2: 32, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '3-2': { sys: 93,  dia: 65, hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '4-1': { sys: 132, dia: 86, hr: 81, spo2: 98,  etco2: 41, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '4-2': { sys: 125, dia: 81, hr: 82, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '5-1': { sys: 152, dia: 91, hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
-                '5-2': { sys: 93,  dia: 65, hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false }
+                '1-1': { sys: 124, hr: 60, spo2: 98,  etco2: 42, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '1-2': { sys: 124, hr: 60, spo2: 100, etco2: 35, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '2-1': { sys: 75,  hr: 62, spo2: 100, etco2: 31, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '2-2': { sys: 102, hr: 75, spo2: 100, etco2: 33, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '3-1': { sys: 81,  hr: 75, spo2: 100, etco2: 32, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '3-2': { sys: 93,  hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '4-1': { sys: 132, hr: 81, spo2: 98,  etco2: 41, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '4-2': { sys: 125, hr: 82, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '5-1': { sys: 152, hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '5-2': { sys: 93,  hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true }
             };
 
             const selected = presets[String(presetKey)];
             if (selected) {
                 Object.assign(state, selected);
+                
+                // DBP Sync가 켜져 있으면 SBP 기반으로 DBP 자동 계산 적용
+                if (state.dbpSync) {
+                    applySysChange(state.sys);
+                }
+
                 DOM.ctrlSelfBreathing.checked = state.selfBreathing;
                 DOM.ctrlDbpSync.checked = state.dbpSync;
                 DOM.ctrlTWave.checked = state.tWaveInverted;
