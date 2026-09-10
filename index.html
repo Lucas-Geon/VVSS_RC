@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Patient Monitor Simulation</title>
+    
+    <!-- 🟢 Firebase SDK 및 QR 라이브러리 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; 
+            position: relative;
+            user-select: none;
+        }
+
+        /* 🟢 모니터 껍데기 */
+        #monitor-wrapper {
+            position: absolute; 
+            left: 2vw; 
+            top: 3vh;
+            width: calc(75vh * 1.3); 
+            min-width: 260px;
+            max-width: 98vw;
+            aspect-ratio: 1.3; 
+            background-image: url('empty monitor.png'); 
+            background-size: 100% 100%; 
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            border-radius: 20px;
+            z-index: 10;
+            touch-action: none;
+        }
+
+        #monitor-handle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 12%; 
+            cursor: move;
+            z-index: 80;
+        }
+
+        .resizer-handle {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 28px;
+            height: 28px;
+            cursor: nwse-resize;
+            z-index: 250;
+            touch-action: none;
+        }
+        .resizer-handle::after {
+            content: '';
+            position: absolute;
+            right: 6px;
+            bottom: 6px;
+            width: 10px;
+            height: 10px;
+            border-right: 3px solid rgba(255, 255, 255, 0.7);
+            border-bottom: 3px solid rgba(255, 255, 255, 0.7);
+        }
+
+        #power-btn-overlay {
+            position: absolute;
+            bottom: 3.5%;  
+            left: 5.5%;    
+            width: 7%;     
+            height: 9%;    
+            border-radius: 50%; 
+            cursor: pointer; 
+            z-index: 200;
+        }
+
+        #mute-btn-overlay {
+            position: absolute;
+            bottom: 4%;  
+            left: 18%; 
+            width: 6%;     
+            height: 8%;    
+            border-radius: 50%; 
+            cursor: pointer; 
+            z-index: 200;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            cursor: move;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .panel-title {
+            font-size: 14px; 
+            font-weight: bold; 
+            color: #ffffff; 
+            letter-spacing: 0.5px; 
+            margin: 0;
+        }
+
+        .panel-top-btn {
+            border: none;
+            padding: 3px 5px;
+            border-radius: 4px;
+            font-size: 10.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .panel-top-btn:hover { filter: brightness(1.2); }
+
+        .min-btn {
+            background: #3a3a3a;
+            color: #ccc;
+            border: 1px solid #555;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1;
+            padding: 0;
+        }
+        .min-btn:hover {
+            background: #555;
+            color: #fff;
+        }
+
+        #monitor {
+            position: absolute;
+            top: 11%;    
+            left: 4.5%;   
+            width: 91%;  
+            height: 74%; 
+            background-color: #000; 
+            display: flex;
+            flex-direction: row; 
+            border-radius: 6px;
+            z-index: 5;
+            overflow: hidden;
+            container-type: size;
+        }
+
+        #mute-message {
+            position: absolute;
+            top: 3cqh;
+            right: 3cqw;
+            color: #ff3333;
+            font-size: 3.5cqh;
+            font-weight: bold;
+            letter-spacing: 1px;
+            display: none; 
+            z-index: 60;
+            animation: textBlink 1.5s infinite; 
+        }
+
+        @keyframes textBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        #waveforms {
+            flex: 1; 
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wave-container {
+            flex: 1 1 0;      
+            min-height: 0;    
+            position: relative;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.15); 
+        }
+        .wave-container:last-child {
+            border-bottom: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .wave-label {
+            position: absolute;
+            top: 1cqh;
+            left: 2cqw;
+            font-size: 3cqh !important;
+            font-weight: bold;
+        }
+        
+        .ecg-color { color: #00ff00; }
+        .spo2-color { color: #00ffff; }
+        .etco2-color { color: #ffffff; }
+        .rr-color { color: #cccccc; }
+        .bt-color { color: #ffff00; }
+
+        #values {
+            width: 23%; 
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: rgba(10, 10, 10, 0.9);
+            padding: 1.5%;
+            gap: 1.5%; 
+            box-sizing: border-box;
+            border-left: 2px solid #222;
+        }
+
+        .val-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; 
+            background-color: #111;
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-radius: 8px; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        
+        .val-box:hover { border-color: rgba(255, 255, 255, 0.4); }
+
+        .val-number { font-size: 9cqh !important; font-weight: bold; line-height: 1; text-align: center; }
+        .val-title { font-size: 2.8cqh !important; font-weight: bold; margin-bottom: 0.5cqh; text-align: center; }
+
+        #nbp-box-container .val-number { font-size: 6cqh !important; margin-top: 1cqh; }
+        #nbp-box-container .val-mean { font-size: 3.5cqh !important; font-weight: bold; margin-top: 0.5cqh; }
+
+        .st-text { font-size: 3.2cqh; font-weight: bold; margin-top: 0.5cqh; }
+
+        .scroll-val { cursor: ns-resize; transition: text-shadow 0.2s, color 0.2s; display: inline-block; }
+        .scroll-val:hover { text-shadow: 0 0 15px rgba(255, 255, 255, 0.9); color: #ffffff !important; }
+
+        .click-toggle { cursor: pointer; transition: text-shadow 0.2s, color 0.2s; display: inline-block; user-select: none; }
+        .click-toggle:hover { color: #ffeb3b !important; text-shadow: 0 0 12px rgba(255, 235, 59, 0.8); }
+
+        @keyframes alarmBlink {
+            0% { background-color: rgba(255, 0, 0, 0); border-color: rgba(255, 255, 255, 0.15); }
+            50% { background-color: rgba(255, 0, 0, 0.5); border-color: rgba(255, 0, 0, 1); box-shadow: inset 0 0 20px rgba(255,0,0,0.8); }
+            100% { background-color: rgba(255, 0, 0, 0); border-color: rgba(255, 255, 255, 0.15); }
+        }
+        .alarm-active { animation: alarmBlink 2s ease-in-out 3; }
+        .alarm-trigger { cursor: pointer; }
+        #standby-btn { display: none; }
+
+        /* 🟢 컨트롤 패널 */
+        #controls {
+            position: absolute; 
+            right: 2vw; 
+            top: 3vh;
+            width: 390px; 
+            min-width: 220px;
+            max-width: 650px;
+            background-color: #2a2a2a;
+            padding: 8px 10px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+            max-height: 94vh;
+            overflow-y: scroll !important; 
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch;
+            z-index: 15;
+            touch-action: pan-y !important;
+        }
+
+        .controls-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .controls-col {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .control-group { display: flex; flex-direction: column; width: 100%; gap: 1px; min-width: 0; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
+        .input-row label { font-size: 9.5px; margin: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin: 1px 0 2px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .slider-row input[type="range"] {
+            flex: 1;
+            min-width: 0;
+            margin: 0;
+            cursor: pointer;
+            height: 14px;
+        }
+        .step-btn {
+            background: #444;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .step-btn:hover { background: #666; }
+        .step-btn:active { background: #888; }
+
+        input[type="number"] {
+            background-color: #111; color: #fff; border: 1px solid #555;
+            padding: 1px 2px; border-radius: 3px; width: 32px;
+            text-align: center; font-weight: bold; font-size: 10px;
+            flex-shrink: 0;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none; margin: 0;
+        }
+
+        .mode-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2px;
+            margin-bottom: 2px;
+            gap: 2px;
+            flex-wrap: nowrap;
+        }
+
+        .mode-row label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .condition-btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+
+        .btn-cond {
+            padding: 5px 3px;
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: 0.15s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+        }
+
+        .btn-cond-title { font-size: 10px; font-weight: bold; white-space: nowrap; }
+        .btn-cond-desc { font-size: 8.5px; opacity: 0.85; font-weight: normal; letter-spacing: -0.3px; white-space: nowrap; }
+
+        .btn-worsen { background-color: #8b0000; color: #ffcccc; }
+        .btn-worsen:hover { background-color: #b22222; color: #ffffff; }
+
+        .btn-improve { background-color: #005f73; color: #cceeff; }
+        .btn-improve:hover { background-color: #0a9396; color: #ffffff; }
+
+        /* 🟢 알람 한계치 설정 패널 스타일 (기본 접힘) */
+        .alarm-limits-section {
+            margin-top: 4px;
+            padding: 5px 6px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid #444;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .alarm-limits-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #ff9800;
+            cursor: pointer;
+        }
+        .alarm-limits-grid {
+            display: none; /* 🟢 접힌 상태 default */
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .alarm-limit-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1e1e1e;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+        .alarm-limit-item label {
+            font-size: 9px;
+            font-weight: bold;
+        }
+        .alarm-limit-inputs {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .alarm-limit-inputs input {
+            width: 26px !important;
+            padding: 1px !important;
+            font-size: 9.5px !important;
+        }
+
+        /* 🟢 시나리오 섹션 스타일 */
+        .scenario-section {
+            margin-top: 3px; padding-top: 3px; border-top: 1px dashed #555;
+            display: flex; flex-direction: column; gap: 3px;
+        }
+        .scenario-header { font-size: 11px; font-weight: bold; color: #ffeb3b; text-align: center; letter-spacing: 1px; }
+        .scenario-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+
+        .btn-scenario {
+            background-color: #333333; color: #e0e0e0; border: 1px solid #555;
+            border-radius: 4px; padding: 4px 2px; font-size: 9.5px; font-weight: bold;
+            cursor: pointer; transition: all 0.15s ease; text-align: center; white-space: nowrap;
+        }
+        .btn-scenario:hover { background-color: #4a4a4a; color: #ffffff; border-color: #ffeb3b; box-shadow: 0 0 6px rgba(255, 235, 59, 0.4); }
+        .btn-scenario:active { transform: scale(0.96); }
+
+        /* 🟢 Apply & Reset 버튼 나란히 배치 */
+        .action-btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        #apply-btn {
+            padding: 6px; font-size: 12px; background-color: #28a745; 
+            color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
+            transition: 0.2s;
+        }
+        #apply-btn:hover { background-color: #218838; }
+
+        #reset-btn {
+            padding: 6px; font-size: 12px; background-color: #ffc107; 
+            color: #000000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
+            transition: 0.2s;
+        }
+        #reset-btn:hover { background-color: #e0a800; }
+
+        #start-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: flex; justify-content: center;
+            align-items: center; z-index: 300;
+        }
+
+        #start-btn {
+            padding: 12px 24px; font-size: 16px; background-color: #007bff;
+            color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+        #start-btn:hover { background-color: #0056b3; }
+        
+        #qr-container {
+            position: absolute; bottom: 20px; left: 20px; width: 180px; min-width: 130px;
+            max-width: 380px; background: rgba(20,20,20,0.95); padding: 10px 12px;
+            border-radius: 12px; border: 1px solid #444; display: flex; flex-direction: column;
+            z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); touch-action: none; box-sizing: border-box;
+        }
+
+        #qr-box {
+            background: white; padding: 6px; border-radius: 6px; display: flex;
+            justify-content: center; align-items: center; margin: 6px 0; width: 100%; box-sizing: border-box;
+        }
+
+        #qr-box img { width: 100% !important; height: auto !important; max-width: 100%; display: block; }
+
+        .session-btn {
+            background: #333; color: #4da3ff; border: 1px solid #555;
+            border-radius: 4px; padding: 4px 6px; font-size: 11px; cursor: pointer;
+            font-weight: bold; transition: 0.2s; width: 100%;
+        }
+        .session-btn:hover { background: #444; color: #fff; }
+    </style>
+</head>
+<body>
+    <div id="monitor-wrapper">
+        <div id="monitor-handle" title="상단 베젤을 잡고 이동"></div>
+        <div id="monitor-resizer" class="resizer-handle" title="크기 조절"></div>
+        <div id="power-btn-overlay" title="전원 버튼 (Stand by)"></div>
+        <div id="mute-btn-overlay" title="음소거 (Mute)"></div>
+
+        <div id="monitor">
+            <div id="mute-message">system : mute</div>
+            <div id="start-overlay">
+                <button id="start-btn">Start Monitoring (Enable Audio)</button>
+            </div>
+            
+            <button id="standby-btn">stand by</button>
+
+            <!-- 파형 영역 -->
+            <div id="waveforms">
+                <div class="wave-container">
+                    <span class="wave-label ecg-color">ECG (<span id="rhythm-label">lead II</span>)</span>
+                    <canvas id="canvas-ecg"></canvas>
+                </div>
+                <div class="wave-container">
+                    <span class="wave-label spo2-color">Pleth (SpO2)</span>
+                    <canvas id="canvas-spo2"></canvas>
+                </div>
+                <div class="wave-container">
+                    <span class="wave-label etco2-color">CO2 (EtCO2: <span id="label-etco2-type">Normal</span>)</span>
+                    <canvas id="canvas-etco2"></canvas>
+                </div>
+                <div class="wave-container">
+                    <span class="wave-label rr-color" id="label-wave-rr">Resp (RR)</span>
+                    <canvas id="canvas-rr"></canvas>
+                </div>
+            </div>
+            
+            <!-- 수치 영역 -->
+            <div id="values">
+                <div class="val-box ecg-color alarm-trigger" id="box-val-hr">
+                    <div class="val-title">HR (bpm)</div>
+                    <div class="val-number scroll-val" id="val-hr" title="휠 조절">61</div>
+                    <div class="st-text">
+                        <span id="btn-toggle-st" class="click-toggle" title="클릭하여 T-Wave 역위 적용">ST</span> 
+                        <span id="val-st" class="scroll-val" style="padding: 0 3px;" title="휠 조절">0.0</span>
+                    </div>
+                </div>
+
+                <div class="val-box spo2-color alarm-trigger" id="box-val-spo2">
+                    <div class="val-title">SpO2 (%)</div>
+                    <div class="val-number scroll-val" id="val-spo2" title="휠 조절">100</div>
+                </div>
+
+                <div class="val-box etco2-color alarm-trigger" id="box-val-etco2">
+                    <div class="val-title">EtCO2</div>
+                    <div class="val-number scroll-val" id="val-etco2" title="휠 조절">34</div>
+                </div>
+
+                <div class="val-box rr-color alarm-trigger" id="box-val-rr">
+                    <div class="val-title" id="label-val-rr">RR</div>
+                    <div class="val-number scroll-val" id="val-rr" title="휠 조절">10</div>
+                </div>
+
+                <div class="val-box bt-color alarm-trigger" id="box-val-bt">
+                    <div class="val-title">BT (℃)</div>
+                    <div class="val-number scroll-val" id="val-bt" title="휠 조절">36.3</div>
+                </div>
+
+                <div class="val-box alarm-trigger" id="nbp-box-container" style="border-color: rgba(255,0,0,0.3);">
+                    <div class="val-title click-toggle" id="label-nbp-title" title="클릭하여 NBP/ABP 전환" style="color: #ff0000;">NBP mmHg (2.5mins)</div>
+                    <div class="val-number" style="color: #ff0000;">
+                        <span id="val-sys" class="scroll-val" title="휠 조절">121</span> / 
+                        <span id="val-dia" class="scroll-val" title="휠 조절">79</span>
+                    </div>
+                    <div class="val-mean" style="color: #ff0000;">(<span id="val-mean">93</span>)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 🟢 컨트롤 패널 -->
+    <div id="controls">
+        <div class="panel-header" id="controls-header" title="패널 헤더를 잡고 이동">
+            <div style="display: flex; align-items: center; gap: 3px; flex-wrap: wrap; flex: 1; min-width: 0;">
+                <div class="panel-title" style="font-size: 12.5px;">Control Panel</div>
+                <div id="connection-status" style="font-size: 9.5px; font-weight: bold; color: #ff0000; padding: 1px 3px; border-radius: 3px; background: rgba(0,0,0,0.3);">Disconnected</div>
+                <!-- 🟢 상단 Start / Standby / Mute / Volume 버튼들 -->
+                <button id="btn-panel-start" class="panel-top-btn" style="background:#28a745; color:#fff;">Start</button>
+                <button id="btn-panel-standby" class="panel-top-btn" style="background:#ffc107; color:#000;">Stand by</button>
+                <button id="btn-panel-mute" class="panel-top-btn" style="background:#6c757d; color:#fff;">Mute</button>
+                <select id="ctrl-volume" class="panel-top-btn" style="background:#111; color:#fff; border:1px solid #555; outline:none;" title="마우스 휠로 조절 가능">
+                    <option value="100">Vol: 100%</option>
+                    <option value="90">Vol: 90%</option>
+                    <option value="80">Vol: 80%</option>
+                    <option value="70">Vol: 70%</option>
+                    <option value="60">Vol: 60%</option>
+                    <option value="50">Vol: 50%</option>
+                    <option value="40">Vol: 40%</option>
+                    <option value="30">Vol: 30%</option>
+                    <option value="20">Vol: 20%</option>
+                    <option value="10">Vol: 10%</option>
+                    <option value="0">Vol: 0%</option>
+                </select>
+            </div>
+            <button class="min-btn" id="ctrl-min-btn" title="최소화/열기">−</button>
+        </div>
+        <div id="controls-resizer" class="resizer-handle" title="크기 조절"></div>
+        
+        <div id="controls-body" style="display: flex; flex-direction: column; gap: 5px; padding-bottom: 12px;">
+            <div class="controls-layout">
+                <!-- ⬅️ 좌측 그룹 -->
+                <div class="controls-col">
+                    <div class="control-group" style="color:#ff0000;">
+                        <div class="input-row">
+                            <label>SBP (Sys):</label>
+                            <input type="number" id="input-sys" min="40" max="250" value="121" tabindex="1">
+                        </div>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-sys" data-step="5">−</button>
+                            <input type="range" id="ctrl-sys" min="40" max="250" value="121" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-sys" data-step="5">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group" style="color:#ff0000;">
+                        <div class="input-row">
+                            <label>DBP (Dia):</label>
+                            <input type="number" id="input-dia" min="20" max="180" value="79" tabindex="2">
+                        </div>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-dia" data-step="5">−</button>
+                            <input type="range" id="ctrl-dia" min="20" max="180" value="79" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-dia" data-step="5">+</button>
+                        </div>
+                        <!-- 🟢 DBP Sync 옵션 -->
+                        <label style="font-size: 9px; color: #aaa; display: flex; align-items: center; margin-top: 1px;">
+                            <input type="checkbox" id="ctrl-dbp-sync" style="margin-right: 3px; cursor: pointer;"> DBP sync
+                        </label>
+                    </div>
+
+                    <div class="control-group ecg-color">
+                        <div class="input-row">
+                            <label>Heart Rate (HR):</label>
+                            <input type="number" id="input-hr" min="30" max="200" value="61" tabindex="3">
+                        </div>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-hr" data-step="3">−</button>
+                            <input type="range" id="ctrl-hr" min="30" max="200" value="61" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-hr" data-step="3">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group ecg-color">
+                        <div class="input-row">
+                            <label>ST Level:</label>
+                            <input type="number" id="input-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="4">
+                        </div>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-st" data-step="0.5">−</button>
+                            <input type="range" id="ctrl-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-st" data-step="0.5">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ➡️ 우측 그룹 -->
+                <div class="controls-col">
+                    <div class="control-group spo2-color">
+                        <div class="input-row">
+                            <label>SpO2 (%):</label>
+                            <input type="number" id="input-spo2" min="50" max="100" value="100" tabindex="5">
+                        </div>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-spo2" data-step="1">−</button>
+                            <input type="range" id="ctrl-spo2" min="50" max="100" value="100" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-spo2" data-step="1">+</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group etco2-color">
+                        <div class="input-row">
+                            <label>EtCO2:</label>
+                            <input type="number" id="input-etco2" min="10" max="80" value="34" tabindex="6">
+                        </div>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-etco2" data-step="1">−</button>
+                            <input type="range" id="ctrl-etco2" min="10" max="80" value="34" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-etco2" data-step="1">+</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group rr-color">
+                        <div class="input-row">
+                            <label>Resp Rate (RR):</label>
+                            <input type="number" id="input-rr" min="4" max="60" value="10" tabindex="7">
+                        </div>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-rr" data-step="1">−</button>
+                            <input type="range" id="ctrl-rr" min="4" max="60" value="10" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-rr" data-step="1">+</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group bt-color">
+                        <div class="input-row">
+                            <label>Body Temp (BT):</label>
+                            <input type="number" id="input-bt" min="10.0" max="40.0" step="0.1" value="36.3" tabindex="8">
+                        </div>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-bt" data-step="0.1">−</button>
+                            <input type="range" id="ctrl-bt" min="10.0" max="40.0" step="0.1" value="36.3" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-bt" data-step="0.1">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mode-row">
+                <label class="ecg-color">
+                    <input type="checkbox" id="ctrl-twave" style="width: auto; margin: 0 3px 0 0; cursor: pointer;" tabindex="9">
+                    T-Wave Inv
+                </label>
+                <label style="color: #ff0000;">
+                    <input type="checkbox" id="ctrl-abp" style="width: auto; margin: 0 3px 0 0; cursor: pointer;" tabindex="10">
+                    ABP
+                </label>
+                <label class="etco2-color">
+                    <input type="checkbox" id="ctrl-self-breathing" style="width: auto; margin: 0 3px 0 0; cursor: pointer;" tabindex="11">
+                    Self Breathing
+                </label>
+            </div>
+
+            <!-- 🟢 환자 상태 원클릭 변화 버튼 -->
+            <div class="condition-btn-group">
+                <button type="button" class="btn-cond btn-worsen" id="btn-worsen">
+                    <span class="btn-cond-title">Worsening condition</span>
+                    <span class="btn-cond-desc">(SBP -5, HR +2, EtCO2 -1)</span>
+                </button>
+                <button type="button" class="btn-cond btn-improve" id="btn-improve">
+                    <span class="btn-cond-title">Improving condition</span>
+                    <span class="btn-cond-desc">(SBP +5, HR -2, EtCO2 +1)</span>
+                </button>
+            </div>
+
+            <!-- 🟢 Apply & Reset 버튼 -->
+            <div class="action-btn-group">
+                <button id="apply-btn" tabindex="12"> Apply </button>
+                <button id="reset-btn" type="button"> Reset </button>
+            </div>
+
+            <!-- ⚡ ECG 리듬 선택 -->
+            <div class="control-group" style="margin-top: 2px;">
+                <div class="input-row">
+                    <label class="ecg-color" style="font-size:10.5px; font-weight:bold;">ECG Rhythm:</label>
+                    <select id="ctrl-rhythm" style="background:#111; color:#00ff00; border:1px solid #555; padding:3px 4px; border-radius:4px; width:68%; font-weight:bold; cursor:pointer; font-size:10px;">
+                        <option value="normal">Normal Sinus</option>
+                        <option value="pvc">Occasional PVC</option>
+                        <option value="bigeminy">Bigeminy PVC</option>
+                        <option value="trigeminy">Trigeminy PVC</option>
+                        <option value="afib">A-Fib</option>
+                        <option value="aflutter">A-Flutter</option>
+                        <option value="vt">V-Tach (VT)</option>
+                        <option value="vf">V-Fib (VF)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 🟢 EtCO2 파형 드롭다운 -->
+            <div class="control-group etco2-color" style="margin-top: 3px; border-top: 1px dashed #555; padding-top: 4px;">
+                <div class="input-row">
+                    <label style="font-size:10.5px; font-weight:bold;">EtCO2 Waveform:</label>
+                    <select id="ctrl-etco2-pattern" style="background:#111; color:#ffffff; border:1px solid #555; padding:3px 4px; border-radius:4px; width:68%; font-weight:bold; cursor:pointer; font-size:10px;">
+                        <option value="normal">Normal (Square)</option>
+                        <option value="curare">Curare Cleft</option>
+                        <option value="ineffective">Trigger Delay / Ineffective</option>
+                        <option value="autotrigger">Auto-Triggering</option>
+                        <option value="doubletrigger">Premature / Double Trigger</option>
+                        <option value="fighting">Delayed Cycling / Fighting</option>
+                        <option value="sharkfin">Shark Fin (Obstruction)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Curare Cleft 세부 조절 -->
+            <div class="control-group etco2-color" id="group-cleft-depth" style="display: none; margin-top: 2px;">
+                <div class="input-row">
+                    <label>Cleft Depth (0.1~0.8):</label>
+                    <input type="number" id="input-cleft-depth" min="0.1" max="0.8" step="0.1" value="0.4">
+                </div>
+                <div class="slider-row">
+                    <input type="range" id="ctrl-cleft-depth" min="0.1" max="0.8" step="0.05" value="0.4">
+                </div>
+            </div>
+
+            <!-- 🟢 [Alarm Limits Configuration] 조절 서브패널 (접이식 default) -->
+            <div class="alarm-limits-section">
+                <div class="alarm-limits-header" id="btn-toggle-limits">
+                    <span>⚙️ Alarm Limits (Low / High)</span>
+                    <span id="label-limits-arrow">▲</span>
+                </div>
+                <div class="alarm-limits-grid" id="alarm-limits-body">
+                    <!-- SBP -->
+                    <div class="alarm-limit-item" style="color:#ff0000;">
+                        <label>SBP</label>
+                        <div class="alarm-limit-inputs">
+                            <input type="number" id="limit-sys-low" value="40">
+                            <span>-</span>
+                            <input type="number" id="limit-sys-high" value="250">
+                        </div>
+                    </div>
+                    <!-- HR -->
+                    <div class="alarm-limit-item ecg-color">
+                        <label>HR</label>
+                        <div class="alarm-limit-inputs">
+                            <input type="number" id="limit-hr-low" value="30">
+                            <span>-</span>
+                            <input type="number" id="limit-hr-high" value="200">
+                        </div>
+                    </div>
+                    <!-- ST -->
+                    <div class="alarm-limit-item ecg-color">
+                        <label>ST (mV)</label>
+                        <div class="alarm-limit-inputs">
+                            <input type="number" id="limit-st-dep" step="0.1" value="-3.0">
+                            <span>-</span>
+                            <input type="number" id="limit-st-elev" step="0.1" value="6.0">
+                        </div>
+                    </div>
+                    <!-- SpO2 -->
+                    <div class="alarm-limit-item spo2-color">
+                        <label>SpO2 (≥)</label>
+                        <div class="alarm-limit-inputs">
+                            <input type="number" id="limit-spo2-low" value="50" style="width:40px !important;">
+                        </div>
+                    </div>
+                    <!-- EtCO2 -->
+                    <div class="alarm-limit-item etco2-color">
+                        <label>EtCO2</label>
+                        <div class="alarm-limit-inputs">
+                            <input type="number" id="limit-etco2-low" value="10">
+                            <span>-</span>
+                            <input type="number" id="limit-etco2-high" value="80">
+                        </div>
+                    </div>
+                    <!-- RR -->
+                    <div class="alarm-limit-item rr-color">
+                        <label>RR</label>
+                        <div class="alarm-limit-inputs">
+                            <input type="number" id="limit-rr-low" value="4">
+                            <span>-</span>
+                            <input type="number" id="limit-rr-high" value="60">
+                        </div>
+                    </div>
+                    <!-- BT -->
+                    <div class="alarm-limit-item bt-color" style="grid-column: 1 / -1;">
+                        <label>BT (℃)</label>
+                        <div class="alarm-limit-inputs">
+                            <input type="number" id="limit-bt-low" step="0.1" value="10.0">
+                            <span>-</span>
+                            <input type="number" id="limit-bt-high" step="0.1" value="40.0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🟢 [RC 시나리오 프리셋] 원클릭 프리셋 영역 -->
+            <div class="scenario-section">
+                <div class="scenario-header">[RC 시나리오 프리셋]</div>
+                <div class="scenario-grid">
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('1-1')">#1-1</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('1-2')">#1-2</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('2-1')">#2-1</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('2-2')">#2-2</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('3-1')">#3-1</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('3-2')">#3-2</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('4-1')">#4-1</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('4-2')">#4-2</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('5-1')">#5-1</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('5-2')">#5-2</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 🟢 QR 박스 & Session ID 표시창 -->
+    <div id="qr-container">
+        <div class="panel-header" id="qr-header" title="QR 영역 헤더를 잡고 이동" style="margin-bottom:2px; border-bottom: 1px solid #444;">
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+                <div style="font-size: 11px; font-weight: bold; color: #ffffff; letter-spacing: 0.5px;">Controller QR</div>
+                <div style="font-size: 10px; color: #aaa;">ID: <span id="session-display" style="color:#00ff00; font-weight:bold;">-</span></div>
+            </div>
+            <button class="min-btn" id="qr-min-btn" title="최소화/열기">−</button>
+        </div>
+        <div id="qr-resizer" class="resizer-handle" title="크기 조절"></div>
+
+        <div id="qr-body" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+            <div id="qr-box"></div>
+            <button class="session-btn" onclick="promptChangeSession()">Change Session ID</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. Firebase 및 초기 설정
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgmCYVWwXKdQb-SUG2G8yV8e75Mf82NeI",
+            authDomain: "virtual-vital-sign.firebaseapp.com",
+            databaseURL: "https://virtual-vital-sign-default-rtdb.firebaseio.com",
+            projectId: "virtual-vital-sign",
+            storageBucket: "virtual-vital-sign.firebasestorage.app",
+            messagingSenderId: "952799562195",
+            appId: "1:952799562195:web:24c7cbe35fa447cceb8726",
+            measurementId: "G-J2Z43XZDWE"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let sessionId = urlParams.get('session');
+        let role = urlParams.get('role');
+
+        const DEFAULT_INITIAL_STATE = {
+            bt: 36.3, hr: 61, spo2: 100, etco2: 34, rr: 10,
+            sys: 121, dia: 79, st: 0.0, tWaveInverted: false, abpMode: false,
+            selfBreathing: false, rhythm: 'normal', dbpSync: false,
+            etco2Pattern: 'normal', cleftDepth: 0.4,
+            isMuted: false, volume: 100, monitorStatus: 'standby',
+            limits: {
+                sysLow: 40, sysHigh: 250,
+                hrLow: 30, hrHigh: 200,
+                stDep: -3.0, stElev: 6.0,
+                spo2Low: 50,
+                etco2Low: 10, etco2High: 80,
+                rrLow: 4, rrHigh: 60,
+                btLow: 10.0, btHigh: 40.0
+            }
+        };
+
+        let state = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+
+        let lastAlarmStatus = {
+            sys: false, hr: false, stDep: false, stElev: false, tInv: false,
+            spo2: false, etco2: false, rr: false, bt: false, rhythm: false
+        };
+
+        const DOM = {
+            valBT: document.getElementById('val-bt'), valHR: document.getElementById('val-hr'),
+            valSpO2: document.getElementById('val-spo2'), valEtCO2: document.getElementById('val-etco2'),
+            valRR: document.getElementById('val-rr'), valSys: document.getElementById('val-sys'),
+            valDia: document.getElementById('val-dia'), valST: document.getElementById('val-st'),
+            
+            boxValHR: document.getElementById('box-val-hr'),
+            boxValSpO2: document.getElementById('box-val-spo2'),
+            boxValEtCO2: document.getElementById('box-val-etco2'),
+            boxValRR: document.getElementById('box-val-rr'),
+            boxValBT: document.getElementById('box-val-bt'),
+            boxValNBP: document.getElementById('nbp-box-container'),
+
+            labelWaveRR: document.getElementById('label-wave-rr'), labelNBPTitle: document.getElementById('label-nbp-title'),
+            labelValRR: document.getElementById('label-val-rr'), labelEtco2Type: document.getElementById('label-etco2-type'),
+            rhythmLabel: document.getElementById('rhythm-label'), sessionDisplay: document.getElementById('session-display'),
+            
+            ctrlBT: document.getElementById('ctrl-bt'), ctrlHR: document.getElementById('ctrl-hr'),
+            ctrlSpO2: document.getElementById('ctrl-spo2'), ctrlEtCO2: document.getElementById('ctrl-etco2'),
+            ctrlRR: document.getElementById('ctrl-rr'), ctrlSys: document.getElementById('ctrl-sys'),
+            ctrlDia: document.getElementById('ctrl-dia'), ctrlST: document.getElementById('ctrl-st'),
+            ctrlABP: document.getElementById('ctrl-abp'), ctrlTWave: document.getElementById('ctrl-twave'), 
+            ctrlSelfBreathing: document.getElementById('ctrl-self-breathing'),
+            ctrlRhythm: document.getElementById('ctrl-rhythm'),
+            ctrlEtco2Pattern: document.getElementById('ctrl-etco2-pattern'),
+            ctrlCleftDepth: document.getElementById('ctrl-cleft-depth'),
+            inCleftDepth: document.getElementById('input-cleft-depth'),
+            groupCleftDepth: document.getElementById('group-cleft-depth'),
+            ctrlDbpSync: document.getElementById('ctrl-dbp-sync'),
+            ctrlVolume: document.getElementById('ctrl-volume'),
+            
+            inBT: document.getElementById('input-bt'), inHR: document.getElementById('input-hr'),
+            inSpO2: document.getElementById('input-spo2'), inEtCO2: document.getElementById('input-etco2'),
+            inRR: document.getElementById('input-rr'), inSys: document.getElementById('input-sys'),
+            inDia: document.getElementById('input-dia'), inST: document.getElementById('input-st'),
+            
+            limSysLow: document.getElementById('limit-sys-low'), limSysHigh: document.getElementById('limit-sys-high'),
+            limHrLow: document.getElementById('limit-hr-low'), limHrHigh: document.getElementById('limit-hr-high'),
+            limStDep: document.getElementById('limit-st-dep'), limStElev: document.getElementById('limit-st-elev'),
+            limSpo2Low: document.getElementById('limit-spo2-low'),
+            limEtco2Low: document.getElementById('limit-etco2-low'), limEtco2High: document.getElementById('limit-etco2-high'),
+            limRrLow: document.getElementById('limit-rr-low'), limRrHigh: document.getElementById('limit-rr-high'),
+            limBtLow: document.getElementById('limit-bt-low'), limBtHigh: document.getElementById('limit-bt-high'),
+            btnToggleLimits: document.getElementById('btn-toggle-limits'),
+            alarmLimitsBody: document.getElementById('alarm-limits-body'),
+            labelLimitsArrow: document.getElementById('label-limits-arrow'),
+
+            btnStart: document.getElementById('start-btn'), btnStandby: document.getElementById('standby-btn'),
+            overlay: document.getElementById('start-overlay'), btnApply: document.getElementById('apply-btn'),
+            btnReset: document.getElementById('reset-btn'),
+            btnToggleST: document.getElementById('btn-toggle-st'),
+            btnWorsen: document.getElementById('btn-worsen'),
+            btnImprove: document.getElementById('btn-improve'),
+            
+            btnPanelStart: document.getElementById('btn-panel-start'),
+            btnPanelStandby: document.getElementById('btn-panel-standby'),
+            btnPanelMute: document.getElementById('btn-panel-mute')
+        };
+
+        const muteMsg = document.getElementById('mute-message');
+        let currentSessionRef = null;
+        let qrCodeInstance = null;
+        let currentMonitorStatus = 'standby';
+
+        // 🟢 연결 상태 감지
+        const connectionStatusEl = document.getElementById('connection-status');
+        firebase.database().ref('.info/connected').on('value', (snap) => {
+            if (snap.val() === true) {
+                connectionStatusEl.innerText = 'Connected';
+                connectionStatusEl.style.color = '#00ff00';
+            } else {
+                connectionStatusEl.innerText = 'Disconnected';
+                connectionStatusEl.style.color = '#ff0000';
+            }
+        });
+
+        // 🟢 정상 범위 초과 감지 및 자동 알람 함수
+        function checkAutoAlarms() {
+            if (currentMonitorStatus !== 'running') return;
+            const lim = state.limits || DEFAULT_INITIAL_STATE.limits;
+
+            const isSysAbnormal = (state.sys < lim.sysLow || state.sys > lim.sysHigh);
+            const isHrAbnormal = (state.hr < lim.hrLow || state.hr > lim.hrHigh);
+            const isStDepAbnormal = (state.st <= lim.stDep);
+            const isStElevAbnormal = (state.st >= lim.stElev);
+            const isTInvAbnormal = Boolean(state.tWaveInverted);
+
+            const isSpo2Abnormal = (state.spo2 < lim.spo2Low);
+            const isEtco2Abnormal = (state.etco2 < lim.etco2Low || state.etco2 > lim.etco2High);
+            const isRrAbnormal = (state.rr < lim.rrLow || state.rr > lim.rrHigh);
+            const isBtAbnormal = (state.bt < lim.btLow || state.bt > lim.btHigh);
+            const isRhythmAbnormal = (state.rhythm !== 'normal');
+
+            if (isSysAbnormal && !lastAlarmStatus.sys) triggerManualAlarm(DOM.boxValNBP);
+            
+            const ecgNeedAlarm = (isHrAbnormal && !lastAlarmStatus.hr) ||
+                                 (isStDepAbnormal && !lastAlarmStatus.stDep) ||
+                                 (isStElevAbnormal && !lastAlarmStatus.stElev) ||
+                                 (isTInvAbnormal && !lastAlarmStatus.tInv) ||
+                                 (isRhythmAbnormal && !lastAlarmStatus.rhythm);
+
+            if (ecgNeedAlarm) {
+                triggerManualAlarm(DOM.boxValHR);
+            }
+
+            if (isSpo2Abnormal && !lastAlarmStatus.spo2) triggerManualAlarm(DOM.boxValSpO2);
+            if (isEtco2Abnormal && !lastAlarmStatus.etco2) triggerManualAlarm(DOM.boxValEtCO2);
+            if (isRrAbnormal && !lastAlarmStatus.rr) triggerManualAlarm(DOM.boxValRR);
+            if (isBtAbnormal && !lastAlarmStatus.bt) triggerManualAlarm(DOM.boxValBT);
+
+            lastAlarmStatus = {
+                sys: isSysAbnormal,
+                hr: isHrAbnormal,
+                stDep: isStDepAbnormal,
+                stElev: isStElevAbnormal,
+                tInv: isTInvAbnormal,
+                spo2: isSpo2Abnormal,
+                etco2: isEtco2Abnormal,
+                rr: isRrAbnormal,
+                bt: isBtAbnormal,
+                rhythm: isRhythmAbnormal
+            };
+        }
+
+        // ==========================================
+        // 2. 세션 연결 및 변경 관리
+        // ==========================================
+        function connectSession(newSessionId) {
+            sessionId = newSessionId;
+            if (DOM.sessionDisplay) DOM.sessionDisplay.innerText = sessionId;
+
+            if (currentSessionRef) {
+                currentSessionRef.off();
+            }
+
+            currentSessionRef = db.ref('sessions/' + sessionId);
+
+            if (role !== 'controller') {
+                currentSessionRef.set(state);
+                renderQRCode();
+            }
+
+            currentSessionRef.on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    state = Object.assign(state, snapshot.val());
+                    if (!state.limits) {
+                        state.limits = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE.limits));
+                    }
+                    updateDisplay();
+                    
+                    DOM.ctrlTWave.checked = !!state.tWaveInverted;
+                    DOM.ctrlABP.checked = !!state.abpMode;
+                    DOM.ctrlSelfBreathing.checked = !!state.selfBreathing;
+                    DOM.ctrlDbpSync.checked = (state.dbpSync !== undefined) ? !!state.dbpSync : false;
+                    DOM.ctrlRhythm.value = state.rhythm || 'normal';
+                    DOM.ctrlEtco2Pattern.value = state.etco2Pattern || 'normal';
+                    DOM.ctrlCleftDepth.value = state.cleftDepth || 0.4;
+                    DOM.inCleftDepth.value = state.cleftDepth || 0.4;
+
+                    if (DOM.ctrlVolume.value != state.volume) DOM.ctrlVolume.value = state.volume;
+
+                    if(state.rhythm === 'vf' || state.rhythm === 'vt') {
+                        DOM.rhythmLabel.innerText = state.rhythm.toUpperCase();
+                    } else if(state.rhythm === 'afib') DOM.rhythmLabel.innerText = "A-Fib";
+                    else if(state.rhythm === 'aflutter') DOM.rhythmLabel.innerText = "A-Flutter";
+                    else DOM.rhythmLabel.innerText = "lead II";
+
+                    const patternNames = {
+                        normal: 'Normal', curare: 'Curare Cleft', ineffective: 'Ineffective Trigger',
+                        autotrigger: 'Auto-Triggering', doubletrigger: 'Double Trigger',
+                        fighting: 'Fighting', sharkfin: 'Shark Fin'
+                    };
+                    DOM.labelEtco2Type.innerText = patternNames[state.etco2Pattern] || 'Normal';
+
+                    if (state.abpMode) {
+                        DOM.labelWaveRR.innerText = "ABP"; DOM.labelWaveRR.style.color = "#ff0000"; 
+                        DOM.labelNBPTitle.innerText = "ABP mmHg";
+                    } else {
+                        DOM.labelWaveRR.innerText = "Resp (RR)"; DOM.labelWaveRR.style.color = "#cccccc"; 
+                        DOM.labelNBPTitle.innerText = "NBP mmHg (2.5mins)";
+                    }
+
+                    if (state.monitorStatus === 'running') {
+                        if (currentMonitorStatus !== 'running') {
+                            startMonitorLocal();
+                        }
+                    } else {
+                        if (currentMonitorStatus !== 'standby') {
+                            standbyMonitorLocal();
+                        }
+                    }
+
+                    checkAutoAlarms();
+                }
+            });
+
+            const newUrl = `${window.location.pathname}?session=${sessionId}${role ? '&role=' + role : ''}`;
+            window.history.replaceState({}, '', newUrl);
+        }
+
+        function renderQRCode() {
+            const qrBox = document.getElementById("qr-box");
+            if (!qrBox) return;
+            qrBox.innerHTML = '';
+            const controllerUrl = `${window.location.origin}${window.location.pathname}?session=${sessionId}&role=controller`;
+            const size = Math.max(80, qrBox.clientWidth - 12 || 120);
+            qrCodeInstance = new QRCode(qrBox, { text: controllerUrl, width: size, height: size });
+        }
+
+        function promptChangeSession() {
+            const input = prompt("변경할 Session ID를 입력하세요 (빈칸 입력 시 무작위 생성):", sessionId);
+            if (input === null) return;
+            const targetId = input.trim().toUpperCase() || Math.random().toString(36).substring(2, 8).toUpperCase();
+            connectSession(targetId);
+        }
+
+        if (role === 'controller') {
+            document.getElementById('monitor-wrapper').style.display = 'none';
+            document.getElementById('qr-container').style.display = 'none';
+            
+            const ctrl = document.getElementById('controls');
+            ctrl.style.position = 'fixed';
+            ctrl.style.top = '0';
+            ctrl.style.left = '0';
+            ctrl.style.width = '100vw';
+            ctrl.style.height = '100vh';
+            ctrl.style.maxWidth = '100vw';
+            ctrl.style.maxHeight = '100vh';
+            ctrl.style.borderRadius = '0';
+            ctrl.style.zIndex = '9999';
+            ctrl.style.backgroundColor = '#1a1a1a';
+            ctrl.style.padding = '6px 8px';
+            ctrl.style.overflowY = 'scroll';
+            ctrl.style.touchAction = 'pan-y';
+            document.getElementById('controls-resizer').style.display = 'none';
+            document.getElementById('ctrl-min-btn').style.display = 'none';
+        }
+
+        if (!sessionId) {
+            sessionId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+        connectSession(sessionId);
+
+        function updateDisplay() {
+            DOM.valBT.innerText = parseFloat(state.bt).toFixed(1);
+            DOM.valHR.innerText = state.hr;
+            DOM.valSpO2.innerText = state.spo2;
+            DOM.valEtCO2.innerText = state.etco2;
+            DOM.valRR.innerText = state.rr; 
+            DOM.valSys.innerText = state.sys;
+            DOM.valDia.innerText = state.dia;
+            DOM.valST.innerText = parseFloat(state.st).toFixed(1);
+            
+            let sysValue = parseInt(state.sys);
+            let diaValue = parseInt(state.dia);
+            document.getElementById('val-mean').innerText = Math.round((sysValue + 2 * diaValue) / 3);
+    
+            DOM.inBT.value = parseFloat(state.bt).toFixed(1);
+            DOM.inHR.value = state.hr;
+            DOM.inSpO2.value = state.spo2;
+            DOM.inEtCO2.value = state.etco2;
+            DOM.inRR.value = state.rr;
+            DOM.inSys.value = state.sys;
+            DOM.inDia.value = state.dia;
+            DOM.inST.value = parseFloat(state.st).toFixed(1);
+
+            DOM.ctrlBT.value = state.bt; DOM.ctrlHR.value = state.hr;
+            DOM.ctrlSpO2.value = state.spo2; DOM.ctrlEtCO2.value = state.etco2;
+            DOM.ctrlRR.value = state.rr; DOM.ctrlSys.value = state.sys;
+            DOM.ctrlDia.value = state.dia; DOM.ctrlST.value = state.st;
+            DOM.ctrlDbpSync.checked = !!state.dbpSync;
+            DOM.ctrlEtco2Pattern.value = state.etco2Pattern || 'normal';
+            DOM.ctrlCleftDepth.value = state.cleftDepth || 0.4;
+            DOM.inCleftDepth.value = state.cleftDepth || 0.4;
+            DOM.groupCleftDepth.style.display = state.etco2Pattern === 'curare' ? 'flex' : 'none';
+
+            if (state.limits) {
+                DOM.limSysLow.value = state.limits.sysLow; DOM.limSysHigh.value = state.limits.sysHigh;
+                DOM.limHrLow.value = state.limits.hrLow; DOM.limHrHigh.value = state.limits.hrHigh;
+                DOM.limStDep.value = state.limits.stDep; DOM.limStElev.value = state.limits.stElev;
+                DOM.limSpo2Low.value = state.limits.spo2Low;
+                DOM.limEtco2Low.value = state.limits.etco2Low; DOM.limEtco2High.value = state.limits.etco2High;
+                DOM.limRrLow.value = state.limits.rrLow; DOM.limRrHigh.value = state.limits.rrHigh;
+                DOM.limBtLow.value = state.limits.btLow; DOM.limBtHigh.value = state.limits.btHigh;
+            }
+
+            if (muteMsg) muteMsg.style.display = state.isMuted ? 'block' : 'none';
+            if (state.isMuted) {
+                DOM.btnPanelMute.style.background = '#dc3545';
+                DOM.btnPanelMute.innerText = 'Unmute';
+            } else {
+                DOM.btnPanelMute.style.background = '#6c757d';
+                DOM.btnPanelMute.innerText = 'Mute';
+            }
+        }
+
+        function syncToFirebase(updates) {
+            if (currentSessionRef) currentSessionRef.update(updates);
+        }
+
+        function applySysChange(newSys) {
+            state.sys = Math.max(40, Math.min(250, newSys));
+            if (state.dbpSync) {
+                state.dia = Math.max(20, Math.min(180, Math.round(state.sys * 2 / 3)));
+                DOM.ctrlDia.value = state.dia;
+            }
+        }
+
+        function attachLimitInputEvent(inputElement, limitKey, isFloat = false) {
+            inputElement.addEventListener('change', () => {
+                const val = isFloat ? parseFloat(inputElement.value) : parseInt(inputElement.value);
+                if (!isNaN(val)) {
+                    if (!state.limits) state.limits = {};
+                    state.limits[limitKey] = val;
+                    syncToFirebase({ limits: state.limits });
+                    checkAutoAlarms();
+                }
+            });
+        }
+        attachLimitInputEvent(DOM.limSysLow, 'sysLow'); attachLimitInputEvent(DOM.limSysHigh, 'sysHigh');
+        attachLimitInputEvent(DOM.limHrLow, 'hrLow'); attachLimitInputEvent(DOM.limHrHigh, 'hrHigh');
+        attachLimitInputEvent(DOM.limStDep, 'stDep', true); attachLimitInputEvent(DOM.limStElev, 'stElev', true);
+        attachLimitInputEvent(DOM.limSpo2Low, 'spo2Low');
+        attachLimitInputEvent(DOM.limEtco2Low, 'etco2Low'); attachLimitInputEvent(DOM.limEtco2High, 'etco2High');
+        attachLimitInputEvent(DOM.limRrLow, 'rrLow'); attachLimitInputEvent(DOM.limRrHigh, 'rrHigh');
+        attachLimitInputEvent(DOM.limBtLow, 'btLow', true); attachLimitInputEvent(DOM.limBtHigh, 'btHigh', true);
+
+        // 🟢 알람 한계치 서브패널 접기/펼치기 토글
+        DOM.btnToggleLimits.addEventListener('click', () => {
+            if (DOM.alarmLimitsBody.style.display === 'grid') {
+                DOM.alarmLimitsBody.style.display = 'none';
+                DOM.labelLimitsArrow.innerText = '▲';
+            } else {
+                DOM.alarmLimitsBody.style.display = 'grid';
+                DOM.labelLimitsArrow.innerText = '▼';
+            }
+        });
+
+        DOM.btnApply.addEventListener('click', () => {
+            state.bt = parseFloat(DOM.inBT.value) || state.bt; 
+            state.hr = parseInt(DOM.inHR.value) || state.hr;
+            state.st = parseFloat(DOM.inST.value) || 0.0; 
+            state.spo2 = parseInt(DOM.inSpO2.value) || state.spo2;
+            state.etco2 = parseInt(DOM.inEtCO2.value) || state.etco2; 
+            state.rr = parseInt(DOM.inRR.value) || state.rr;
+            state.cleftDepth = parseFloat(DOM.inCleftDepth.value) || state.cleftDepth;
+            
+            applySysChange(parseInt(DOM.inSys.value) || state.sys);
+            if (!state.dbpSync) {
+                state.dia = parseInt(DOM.inDia.value) || state.dia;
+            }
+
+            updateDisplay();
+            syncToFirebase(state);
+            checkAutoAlarms();
+        });
+
+        // 🟢 Reset 버튼 클릭 시 초기 V/S 복구
+        DOM.btnReset.addEventListener('click', () => {
+            const currentStatus = state.monitorStatus;
+            const currentVol = state.volume;
+            const currentMuted = state.isMuted;
+
+            state = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+            state.monitorStatus = currentStatus;
+            state.volume = currentVol;
+            state.isMuted = currentMuted;
+
+            DOM.ctrlSelfBreathing.checked = state.selfBreathing;
+            DOM.ctrlDbpSync.checked = state.dbpSync;
+            DOM.ctrlTWave.checked = state.tWaveInverted;
+            toggleABPMode(state.abpMode);
+
+            updateDisplay();
+            syncToFirebase(state);
+            checkAutoAlarms();
+        });
+
+        // 🟢 Worsening Condition
+        DOM.btnWorsen.addEventListener('click', () => {
+            applySysChange(parseInt(state.sys) - 5);
+            state.hr = Math.max(60, Math.min(120, parseInt(state.hr) + 2));
+            state.etco2 = Math.max(28, Math.min(38, parseInt(state.etco2) - 1));
+            updateDisplay();
+            syncToFirebase({ sys: state.sys, dia: state.dia, hr: state.hr, etco2: state.etco2 });
+            checkAutoAlarms();
+        });
+
+        // 🟢 Improving Condition
+        DOM.btnImprove.addEventListener('click', () => {
+            applySysChange(parseInt(state.sys) + 5);
+            state.hr = Math.max(60, Math.min(120, parseInt(state.hr) - 2));
+            state.etco2 = Math.max(28, Math.min(38, parseInt(state.etco2) + 1));
+            updateDisplay();
+            syncToFirebase({ sys: state.sys, dia: state.dia, hr: state.hr, etco2: state.etco2 });
+            checkAutoAlarms();
+        });
+
+        // 🟢 [RC 시나리오 프리셋]
+        function applyRCPreset(presetKey) {
+            const presets = {
+                '1-1': { sys: 124, dia: 76, hr: 60, spo2: 98,  etco2: 42, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '1-2': { sys: 124, dia: 76, hr: 60, spo2: 100, etco2: 35, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '2-1': { sys: 75,  dia: 43, hr: 62, spo2: 100, etco2: 31, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '2-2': { sys: 102, dia: 68, hr: 75, spo2: 100, etco2: 33, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '3-1': { sys: 81,  dia: 53, hr: 75, spo2: 100, etco2: 32, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '3-2': { sys: 93,  dia: 65, hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '4-1': { sys: 132, dia: 86, hr: 81, spo2: 98,  etco2: 41, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '4-2': { sys: 125, dia: 81, hr: 82, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '5-1': { sys: 152, dia: 91, hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false },
+                '5-2': { sys: 93,  dia: 65, hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: false }
+            };
+
+            const selected = presets[String(presetKey)];
+            if (selected) {
+                Object.assign(state, selected);
+                DOM.ctrlSelfBreathing.checked = state.selfBreathing;
+                DOM.ctrlDbpSync.checked = state.dbpSync;
+                DOM.ctrlTWave.checked = state.tWaveInverted;
+                toggleABPMode(state.abpMode);
+                updateDisplay();
+                syncToFirebase(state);
+                checkAutoAlarms();
+            }
+        }
+
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') DOM.btnApply.click();
+            });
+        });
+
+        document.querySelectorAll('.step-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetId = e.target.getAttribute('data-target');
+                const step = parseFloat(e.target.getAttribute('data-step'));
+                const input = document.getElementById(targetId);
+                const isPlus = e.target.classList.contains('plus');
+                
+                let newVal = parseFloat(input.value) + (isPlus ? step : -step);
+                const min = parseFloat(input.min);
+                const max = parseFloat(input.max);
+                if(newVal < min) newVal = min;
+                if(newVal > max) newVal = max;
+                
+                input.value = step < 1 ? newVal.toFixed(1) : Math.round(newVal);
+                input.dispatchEvent(new Event('input')); 
+            });
+        });
+
+        DOM.ctrlBT.oninput = (e) => { state.bt = parseFloat(e.target.value); updateDisplay(); syncToFirebase({bt: state.bt}); checkAutoAlarms(); };
+        DOM.ctrlHR.oninput = (e) => { state.hr = parseInt(e.target.value); updateDisplay(); syncToFirebase({hr: state.hr}); checkAutoAlarms(); };
+        DOM.ctrlSpO2.oninput = (e) => { state.spo2 = parseInt(e.target.value); updateDisplay(); syncToFirebase({spo2: state.spo2}); checkAutoAlarms(); };
+        DOM.ctrlEtCO2.oninput = (e) => { state.etco2 = parseInt(e.target.value); updateDisplay(); syncToFirebase({etco2: state.etco2}); checkAutoAlarms(); };
+        DOM.ctrlRR.oninput = (e) => { state.rr = parseInt(e.target.value); updateDisplay(); syncToFirebase({rr: state.rr}); checkAutoAlarms(); };
+        DOM.ctrlST.oninput = (e) => { state.st = parseFloat(e.target.value); updateDisplay(); syncToFirebase({st: state.st}); checkAutoAlarms(); };
+        DOM.ctrlCleftDepth.oninput = (e) => { state.cleftDepth = parseFloat(e.target.value); DOM.inCleftDepth.value = state.cleftDepth; syncToFirebase({cleftDepth: state.cleftDepth}); };
+
+        DOM.ctrlSys.oninput = (e) => { 
+            applySysChange(parseInt(e.target.value)); 
+            updateDisplay(); 
+            syncToFirebase({sys: state.sys, dia: state.dia}); 
+            checkAutoAlarms();
+        };
+        
+        DOM.ctrlDia.oninput = (e) => { 
+            state.dia = parseInt(e.target.value); 
+            if(state.dbpSync) {
+                state.dbpSync = false;
+                DOM.ctrlDbpSync.checked = false;
+                syncToFirebase({dbpSync: false});
+            }
+            updateDisplay(); 
+            syncToFirebase({dia: state.dia}); 
+        };
+
+        DOM.ctrlDbpSync.addEventListener('change', (e) => {
+            state.dbpSync = e.target.checked;
+            if (state.dbpSync) {
+                state.dia = Math.max(20, Math.min(180, Math.round(state.sys * 2 / 3)));
+            }
+            updateDisplay();
+            syncToFirebase({ dbpSync: state.dbpSync, dia: state.dia });
+        });
+
+        DOM.ctrlTWave.addEventListener('change', (e) => { 
+            state.tWaveInverted = e.target.checked; 
+            syncToFirebase({tWaveInverted: state.tWaveInverted}); 
+            checkAutoAlarms();
+        });
+
+        DOM.btnToggleST.addEventListener('click', () => {
+            state.tWaveInverted = !state.tWaveInverted;
+            DOM.ctrlTWave.checked = state.tWaveInverted;
+            syncToFirebase({tWaveInverted: state.tWaveInverted});
+            checkAutoAlarms();
+        });
+
+        function toggleABPMode(isABP) {
+            state.abpMode = isABP;
+            DOM.ctrlABP.checked = state.abpMode; 
+            if (state.abpMode) {
+                DOM.labelWaveRR.innerText = "ABP";
+                DOM.labelWaveRR.style.color = "#ff0000"; 
+                DOM.labelNBPTitle.innerText = "ABP mmHg";
+            } else {
+                DOM.labelWaveRR.innerText = "Resp (RR)";
+                DOM.labelWaveRR.style.color = "#cccccc"; 
+                DOM.labelNBPTitle.innerText = "NBP mmHg (2.5mins)";
+            }
+            updateDisplay();
+        }
+
+        DOM.ctrlABP.addEventListener('change', (e) => {
+            toggleABPMode(e.target.checked);
+            syncToFirebase({abpMode: state.abpMode});
+        });
+
+        DOM.ctrlSelfBreathing.addEventListener('change', (e) => {
+            state.selfBreathing = e.target.checked;
+            syncToFirebase({ selfBreathing: state.selfBreathing });
+        });
+        
+        DOM.labelNBPTitle.addEventListener('click', () => {
+            toggleABPMode(!state.abpMode);
+            syncToFirebase({abpMode: state.abpMode});
+        });
+
+        DOM.ctrlRhythm.addEventListener('change', (e) => {
+            state.rhythm = e.target.value;
+            syncToFirebase({rhythm: state.rhythm});
+            checkAutoAlarms();
+        });
+
+        DOM.ctrlRhythm.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const dir = e.deltaY > 0 ? 1 : -1;
+            let nextIndex = DOM.ctrlRhythm.selectedIndex + dir;
+            if (nextIndex < 0) nextIndex = 0;
+            if (nextIndex >= DOM.ctrlRhythm.options.length) nextIndex = DOM.ctrlRhythm.options.length - 1;
+            DOM.ctrlRhythm.selectedIndex = nextIndex;
+            state.rhythm = DOM.ctrlRhythm.value;
+            syncToFirebase({ rhythm: state.rhythm });
+            checkAutoAlarms();
+        }, { passive: false });
+
+        DOM.ctrlEtco2Pattern.addEventListener('change', (e) => {
+            state.etco2Pattern = e.target.value;
+            updateDisplay();
+            syncToFirebase({ etco2Pattern: state.etco2Pattern });
+        });
+
+        DOM.ctrlEtco2Pattern.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const dir = e.deltaY > 0 ? 1 : -1;
+            let nextIndex = DOM.ctrlEtco2Pattern.selectedIndex + dir;
+            if (nextIndex < 0) nextIndex = 0;
+            if (nextIndex >= DOM.ctrlEtco2Pattern.options.length) nextIndex = DOM.ctrlEtco2Pattern.options.length - 1;
+            DOM.ctrlEtco2Pattern.selectedIndex = nextIndex;
+            state.etco2Pattern = DOM.ctrlEtco2Pattern.value;
+            updateDisplay();
+            syncToFirebase({ etco2Pattern: state.etco2Pattern });
+        }, { passive: false });
+
+        // 🟢 패널 상단 Start 버튼 (비동기 멈춤 방지 패치)
+        DOM.btnPanelStart.addEventListener('click', () => {
+            state.monitorStatus = 'running';
+            syncToFirebase({ monitorStatus: 'running' });
+            startMonitorLocal();
+        });
+
+        DOM.btnPanelStandby.addEventListener('click', () => {
+            state = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+            syncToFirebase(state);
+            standbyMonitorLocal();
+        });
+
+        DOM.btnPanelMute.addEventListener('click', (e) => {
+            e.stopPropagation();
+            state.isMuted = !state.isMuted;
+            syncToFirebase({ isMuted: state.isMuted });
+            updateDisplay();
+        });
+
+        DOM.ctrlVolume.addEventListener('change', (e) => {
+            state.volume = parseInt(e.target.value);
+            syncToFirebase({ volume: state.volume });
+        });
+
+        DOM.ctrlVolume.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const step = 10;
+            const delta = e.deltaY < 0 ? step : -step;
+            let currentVol = parseInt(DOM.ctrlVolume.value) || 0;
+            let newVol = Math.max(0, Math.min(100, currentVol + delta));
+            
+            DOM.ctrlVolume.value = String(newVol);
+            state.volume = newVol;
+            syncToFirebase({ volume: state.volume });
+        }, { passive: false });
+
+        function setupMonitorWheel(id, stateKey, min, max, step) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const direction = e.deltaY < 0 ? 1 : -1;
+                let newValue = parseFloat(state[stateKey]) + (direction * step);
+                if (step < 1) newValue = parseFloat(newValue.toFixed(1));
+                if (newValue >= min && newValue <= max) {
+                    if (stateKey === 'sys') {
+                        applySysChange(newValue);
+                        updateDisplay();
+                        syncToFirebase({ sys: state.sys, dia: state.dia });
+                    } else if (stateKey === 'dia') {
+                        state.dia = newValue;
+                        if(state.dbpSync) {
+                            state.dbpSync = false;
+                            DOM.ctrlDbpSync.checked = false;
+                            syncToFirebase({dbpSync: false});
+                        }
+                        updateDisplay();
+                        syncToFirebase({ dia: state.dia });
+                    } else {
+                        state[stateKey] = newValue;
+                        updateDisplay();
+                        syncToFirebase({ [stateKey]: newValue });
+                    }
+                    checkAutoAlarms();
+                }
+            }, { passive: false });
+        }
+
+        setupMonitorWheel('val-bt', 'bt', 10.0, 40.0, 0.1); setupMonitorWheel('val-hr', 'hr', 30, 200, 1);
+        setupMonitorWheel('val-st', 'st', -3.0, 3.0, 0.1); setupMonitorWheel('val-spo2', 'spo2', 50, 100, 1);
+        setupMonitorWheel('val-etco2', 'etco2', 10, 80, 1); setupMonitorWheel('val-rr', 'rr', 4, 60, 1);
+        setupMonitorWheel('val-sys', 'sys', 40, 250, 1); setupMonitorWheel('val-dia', 'dia', 20, 180, 1);
+
+        const inputs = document.querySelectorAll('input[type="range"]');
+        inputs.forEach(input => {
+            input.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const step = parseFloat(this.step) || 1;
+                const direction = e.deltaY < 0 ? 1 : -1;
+                let newValue = parseFloat(this.value) + (direction * step);
+                if (newValue >= parseFloat(this.min) && newValue <= parseFloat(this.max)) {
+                    this.value = step < 1 ? newValue.toFixed(1) : newValue;
+                    this.dispatchEvent(new Event('input'));
+                }
+            }, { passive: false }); 
+        });
+
+        // ==========================================
+        // 4. 모니터 시작, 알람, 파형 엔진
+        // ==========================================
+
+        document.getElementById('mute-btn-overlay').addEventListener('click', () => {
+            state.isMuted = !state.isMuted;
+            syncToFirebase({ isMuted: state.isMuted });
+            updateDisplay();
+        });
+
+        let audioCtx; let lastBeepTime = 0; let animationId; 
+        let ekgAudioBuffer = null; 
+        let alarmAudioBuffer = null; 
+
+        // 🟢 비동기 오디오 로드
+        async function loadAlarmSound(url) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const arrayBuffer = await response.arrayBuffer();
+                alarmAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            } catch (error) {
+                console.warn("alarm.mp3 음원 로드 실패 (비상 합성음 사용):", error);
+                alarmAudioBuffer = null;
+            }
+        }
+
+        async function loadEkgSound(url) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const arrayBuffer = await response.arrayBuffer();
+                ekgAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            } catch (error) {
+                console.warn("EKG.mp3 음원 로드 실패:", error);
+                ekgAudioBuffer = null;
+            }
+        }
+
+        function triggerManualAlarm(boxElement) {
+            if (!boxElement || boxElement.classList.contains('alarm-active')) return; 
+            boxElement.classList.add('alarm-active');
+            
+            if (audioCtx && audioCtx.state === 'running' && !state.isMuted && (state.volume || 0) > 0) {
+                const now = audioCtx.currentTime;
+                const volRatio = (state.volume !== undefined ? state.volume : 100) / 100;
+
+                if (alarmAudioBuffer) {
+                    for (let i = 0; i < 3; i++) {
+                        const source = audioCtx.createBufferSource();
+                        source.buffer = alarmAudioBuffer;
+                        const gainNode = audioCtx.createGain();
+                        source.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        gainNode.gain.setValueAtTime(volRatio * 2.0, now + i * 2.0);
+                        source.start(now + i * 2.0);
+                    }
+                } else {
+                    for (let i = 0; i < 3; i++) {
+                        const startTime = now + i * 2.0;
+                        const osc = audioCtx.createOscillator();
+                        const gainNode = audioCtx.createGain();
+                        osc.type = 'square'; 
+                        osc.frequency.setValueAtTime(400, startTime);
+                        osc.frequency.setValueAtTime(500, startTime + 0.1); 
+                        osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                        gainNode.gain.setValueAtTime(0, startTime);
+                        gainNode.gain.linearRampToValueAtTime(0.5 * volRatio, startTime + 0.05);
+                        gainNode.gain.linearRampToValueAtTime(0, startTime + 0.4); 
+                        osc.start(startTime); osc.stop(startTime + 0.4);
+                    }
+                }
+            }
+            setTimeout(() => { boxElement.classList.remove('alarm-active'); }, 6000);
+        }
+
+        document.querySelectorAll('.alarm-trigger').forEach(box => {
+            box.addEventListener('click', (e) => {
+                if (e.target.classList.contains('click-toggle') || e.target.tagName === 'INPUT') return; 
+                triggerManualAlarm(box);
+            });
+        });
+
+        function playBeep() {
+            if (!audioCtx || state.isMuted || state.rhythm === 'vf' || (state.volume || 0) <= 0) return; 
+            const now = audioCtx.currentTime;
+            const volRatio = (state.volume !== undefined ? state.volume : 100) / 100;
+
+            if (ekgAudioBuffer) {
+                const source = audioCtx.createBufferSource();
+                source.buffer = ekgAudioBuffer;
+                
+                const gainNode = audioCtx.createGain();
+                
+                let pitchRatio = 1.0;
+                if (state.spo2 < 100) {
+                    pitchRatio = Math.max(0.6, 1.0 - ((100 - state.spo2) * 0.015));
+                }
+                source.playbackRate.value = pitchRatio;
+
+                source.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                gainNode.gain.setValueAtTime(volRatio * 2.5, now); 
+                source.start(now);
+            } else {
+                const osc1 = audioCtx.createOscillator(); const osc2 = audioCtx.createOscillator();
+                const mainGain = audioCtx.createGain();
+
+                let freq = 800 + (state.spo2 - 70) * (600 / 40);
+                let baseFreq = Math.max(300, Math.min(1500, freq));
+
+                osc1.frequency.setValueAtTime(baseFreq, now); osc1.type = 'sine'; 
+                osc2.frequency.setValueAtTime(baseFreq * 0.498, now); osc2.type = 'triangle'; 
+
+                osc1.connect(mainGain); osc2.connect(mainGain); mainGain.connect(audioCtx.destination);
+                mainGain.gain.setValueAtTime(0, now);
+                mainGain.gain.linearRampToValueAtTime(0.8 * volRatio, now + 0.02); 
+                mainGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+
+                osc1.start(now); osc2.start(now); osc1.stop(now + 0.2); osc2.stop(now + 0.2);
+            }
+        }
+
+        // 🟢 비동기 오디오 로딩 멈춤 방지 및 캔버스 리사이즈 타이밍 최적화
+        function startMonitorLocal() {
+            currentMonitorStatus = 'running';
+            if(DOM.overlay) DOM.overlay.style.display = 'none';
+
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                if (!ekgAudioBuffer) loadEkgSound('EKG.mp3');
+                if (!alarmAudioBuffer) loadAlarmSound('alarm.mp3');
+            } catch (err) {
+                console.warn("Audio system initialization failed:", err);
+            }
+
+            lastBeepTime = performance.now();
+            cancelAnimationFrame(animationId);
+            scanX = 0;
+            
+            resizeCanvas();
+            animationId = requestAnimationFrame(drawWaveforms);
+            checkAutoAlarms();
+        }
+
+        function standbyMonitorLocal() {
+            currentMonitorStatus = 'standby';
+            if(DOM.overlay) DOM.overlay.style.display = 'flex';
+            cancelAnimationFrame(animationId);
+            if (audioCtx) {
+                audioCtx.close();
+                audioCtx = null;
+                ekgAudioBuffer = null;
+                alarmAudioBuffer = null;
+            }
+            for (let key in ctxs) {
+                if (ctxs[key]) ctxs[key].clearRect(0, 0, canvases[key].width, canvases[key].height);
+            }
+            lastAlarmStatus = {
+                sys: false, hr: false, stDep: false, stElev: false, tInv: false,
+                spo2: false, etco2: false, rr: false, bt: false, rhythm: false
+            };
+            updateDisplay();
+        }
+
+        DOM.btnStart.addEventListener('click', () => {
+            state.monitorStatus = 'running';
+            syncToFirebase({ monitorStatus: 'running' });
+            startMonitorLocal();
+        });
+
+        DOM.btnStandby.addEventListener('click', () => {
+            state = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+            syncToFirebase(state);
+            standbyMonitorLocal();
+        });
+
+        document.getElementById('power-btn-overlay').addEventListener('click', () => { DOM.btnStandby.click(); });
+
+        const canvases = {
+            ecg: document.getElementById('canvas-ecg'), spo2: document.getElementById('canvas-spo2'),
+            etco2: document.getElementById('canvas-etco2'), rr: document.getElementById('canvas-rr')
+        };
+        const ctxs = {};
+        
+        function resizeCanvas() {
+            for (let key in canvases) {
+                if (canvases[key] && canvases[key].parentElement) {
+                    const w = canvases[key].parentElement.clientWidth;
+                    const h = canvases[key].parentElement.clientHeight;
+                    if(w > 0 && h > 0) {
+                        canvases[key].width = w;
+                        canvases[key].height = h;
+                        ctxs[key] = canvases[key].getContext('2d');
+                    }
+                }
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', resizeCanvas);
+        
+        const ro = new ResizeObserver(() => resizeCanvas());
+        ro.observe(document.getElementById('monitor'));
+        resizeCanvas();
+
+        let scanX = 0; const scanSpeed = 2.5; let lastYs = { ecg: 0, spo2: 0, etco2: 0, rr: 0 };
+        let lastEtco2Cycle = -1;
+
+        // ==========================================
+        // 🟢 Capnography Mathematical Models
+        // ==========================================
+        class CapnographyRenderer {
+            static calculate(phase, pattern, cleftDepth, timeSec) {
+                let v = 0;
+                switch (pattern) {
+                    case 'curare': {
+                        const pStart = 0.25, pEnd = 0.75, rDur = 0.015, fDur = 0.015;
+                        if (phase >= pStart && phase < pStart + rDur) {
+                            v = (phase - pStart) / rDur;
+                        } else if (phase >= pStart + rDur && phase <= pEnd) {
+                            const pProg = (phase - (pStart + rDur)) / (pEnd - (pStart + rDur));
+                            let basePlateau = 1.0 + pProg * 0.04;
+                            if (pProg >= 0.45 && pProg <= 0.70) {
+                                const cProg = (pProg - 0.45) / 0.25;
+                                const dip = Math.sin(cProg * Math.PI) * (cleftDepth || 0.4);
+                                v = Math.max(0.1, basePlateau - dip);
+                            } else {
+                                v = basePlateau;
+                            }
+                        } else if (phase > pEnd && phase <= pEnd + fDur) {
+                            v = 1.04 * (1 - (phase - pEnd) / fDur);
+                        } else {
+                            v = 0;
+                        }
+                        break;
+                    }
+                    case 'ineffective': {
+                        const cycle = Math.floor(timeSec);
+                        const isMissed = (cycle % 3 === 2);
+                        if (isMissed) {
+                            if (phase >= 0.2 && phase < 0.4) {
+                                v = Math.sin((phase - 0.2) / 0.2 * Math.PI) * 0.25;
+                            } else {
+                                v = 0;
+                            }
+                        } else {
+                            if (phase >= 0.20 && phase < 0.24) {
+                                v = -0.08 * Math.sin((phase - 0.20) / 0.04 * Math.PI);
+                            } else if (phase >= 0.24 && phase < 0.26) {
+                                v = (phase - 0.24) / 0.02;
+                            } else if (phase >= 0.26 && phase <= 0.75) {
+                                v = 1.0 + (phase - 0.26) * 0.05;
+                            } else if (phase > 0.75 && phase <= 0.77) {
+                                v = 1.03 * (1 - (phase - 0.75) / 0.02);
+                            } else {
+                                v = 0;
+                            }
+                        }
+                        break;
+                    }
+                    case 'autotrigger': {
+                        const pStart = 0.2, pEnd = 0.65;
+                        if (phase >= pStart && phase < pStart + 0.02) {
+                            v = (phase - pStart) / 0.02;
+                        } else if (phase >= pStart + 0.02 && phase <= pEnd) {
+                            v = 0.85 + Math.sin(timeSec * 30) * 0.03;
+                        } else if (phase > pEnd && phase <= pEnd + 0.02) {
+                            v = 0.85 * (1 - (phase - pEnd) / 0.02);
+                        } else {
+                            v = Math.abs(Math.sin(timeSec * 25)) * 0.04;
+                        }
+                        break;
+                    }
+                    case 'doubletrigger': {
+                        if (phase >= 0.15 && phase < 0.40) {
+                            const subP = (phase - 0.15) / 0.25;
+                            if (subP < 0.1) v = subP / 0.1 * 0.8;
+                            else if (subP < 0.8) v = 0.8;
+                            else v = 0.8 * (1 - (subP - 0.8) / 0.2);
+                        } else if (phase >= 0.42 && phase < 0.75) {
+                            const subP2 = (phase - 0.42) / 0.33;
+                            if (subP2 < 0.08) v = subP2 / 0.08 * 1.05;
+                            else if (subP2 < 0.85) v = 1.05;
+                            else v = 1.05 * (1 - (subP2 - 0.85) / 0.15);
+                        } else {
+                            v = 0;
+                        }
+                        break;
+                    }
+                    case 'fighting': {
+                        if (phase >= 0.25 && phase < 0.27) {
+                            v = (phase - 0.25) / 0.02;
+                        } else if (phase >= 0.27 && phase <= 0.75) {
+                            const prog = (phase - 0.27) / 0.48;
+                            v = 1.0 + prog * 0.08 + Math.sin(phase * 40 * Math.PI) * 0.08;
+                        } else if (phase > 0.75 && phase <= 0.77) {
+                            v = 1.1 * (1 - (phase - 0.75) / 0.02);
+                        } else {
+                            v = 0;
+                        }
+                        break;
+                    }
+                    case 'sharkfin': {
+                        if (phase >= 0.20 && phase <= 0.75) {
+                            const prog = (phase - 0.20) / 0.55;
+                            v = Math.pow(prog, 2.5) * 1.08;
+                        } else if (phase > 0.75 && phase <= 0.78) {
+                            v = 1.08 * (1 - (phase - 0.75) / 0.03);
+                        } else {
+                            v = 0;
+                        }
+                        break;
+                    }
+                    case 'normal':
+                    default: {
+                        const pStart = 0.25, pEnd = 0.75, rDur = 0.015, fDur = 0.015;
+                        if (phase >= pStart && phase < pStart + rDur) {
+                            v = (phase - pStart) / rDur;
+                        } else if (phase >= pStart + rDur && phase <= pEnd) {
+                            const pProg = (phase - (pStart + rDur)) / (pEnd - (pStart + rDur));
+                            v = 1.0 + pProg * 0.04;
+                        } else if (phase > pEnd && phase <= pEnd + fDur) {
+                            v = 1.04 * (1 - (phase - pEnd) / fDur);
+                        } else {
+                            v = 0;
+                        }
+                        break;
+                    }
+                }
+                return v;
+            }
+        }
+
+        function drawWaveforms(timestamp) {
+            const beepInterval = 60000 / state.hr;
+            if (timestamp - lastBeepTime >= beepInterval) { playBeep(); lastBeepTime = timestamp; }
+
+            scanX += scanSpeed; if (scanX >= canvases.ecg.width) scanX = 0;
+
+            for (let key in ctxs) {
+                const ctx = ctxs[key];
+                if (!ctx) continue;
+                
+                const h = canvases[key].height;
+                ctx.clearRect(scanX, 0, 15, h); ctx.beginPath();
+                ctx.moveTo(scanX - scanSpeed, lastYs[key] || h / 2);
+
+                let y = h / 2; const timeSec = timestamp / 1000;
+
+                if (key === 'ecg') {
+                    const beatDuration = 60 / state.hr; 
+                    const phase = (timeSec % beatDuration) / beatDuration;
+                    const beatIndex = Math.floor(timeSec / beatDuration);
+                    const stOffset = state.st * 0.05; 
+                    const rhythm = state.rhythm || 'normal';
+                    let v = 0;
+                    let baselineY = h * 0.7;
+
+                    if (rhythm === 'vf') {
+                        baselineY = h * 0.55;
+                        v = Math.sin(timeSec * 22) * 0.35 + Math.cos(timeSec * 14) * 0.25 + Math.sin(timeSec * 35) * 0.15;
+                    } 
+                    else if (rhythm === 'vt') {
+                        baselineY = h * 0.55;
+                        let vtRate = Math.max(120, state.hr);
+                        let vtPhase = (timeSec % (60 / vtRate)) / (60 / vtRate);
+                        v = Math.sin(vtPhase * Math.PI * 2) * 0.65 - Math.sin(vtPhase * Math.PI * 4) * 0.15;
+                    } 
+                    else if (rhythm === 'afib') {
+                        v = Math.sin(timeSec * 25) * 0.04 + Math.sin(timeSec * 15) * 0.02; 
+                        if (phase >= 0.22 && phase < 0.24) v += 0.9;
+                        else if (phase >= 0.24 && phase < 0.28) v += -0.2 + (phase - 0.24) * 5 * (stOffset + 0.2);
+                        else if (phase >= 0.28 && phase <= 0.4) v += stOffset;
+                        else if (phase > 0.4 && phase <= 0.55) {
+                            const tAmp = (state.tWaveInverted ? -0.2 : 0.15) + (state.st * 0.04);
+                            v += stOffset + Math.sin((phase - 0.4) * (Math.PI / 0.15)) * tAmp;
+                        }
+                    } 
+                    else if (rhythm === 'aflutter') {
+                        v = -0.12 * ((timeSec * 5) % 1.0);
+                        if (phase >= 0.22 && phase < 0.24) v += 0.9;
+                        else if (phase >= 0.24 && phase < 0.28) v += -0.2 + (phase - 0.24) * 5 * (stOffset + 0.2);
+                        else if (phase >= 0.28 && phase <= 0.4) v += stOffset;
+                        else if (phase > 0.4 && phase <= 0.55) {
+                            const tAmp = (state.tWaveInverted ? -0.2 : 0.15) + (state.st * 0.04);
+                            v += stOffset + Math.sin((phase - 0.4) * (Math.PI / 0.15)) * tAmp;
+                        }
+                    } 
+                    else {
+                        let isPVC = false;
+                        if (rhythm === 'pvc' && (Math.sin(beatIndex * 123.45) > 0.8)) isPVC = true;
+                        if (rhythm === 'bigeminy' && (beatIndex % 2 === 1)) isPVC = true;
+                        if (rhythm === 'trigeminy' && (beatIndex % 3 === 2)) isPVC = true;
+
+                        if (isPVC) {
+                            if (phase >= 0.18 && phase < 0.25) v = -0.35 * Math.sin((phase - 0.18) * Math.PI / 0.07);
+                            else if (phase >= 0.25 && phase < 0.35) v = 1.1 * Math.sin((phase - 0.25) * Math.PI / 0.1);
+                            else if (phase >= 0.35 && phase <= 0.6) v = -0.35 * Math.sin((phase - 0.35) * Math.PI / 0.25);
+                        } else {
+                            if (phase > 0.1 && phase < 0.15) v = Math.sin((phase - 0.1) * 20 * Math.PI) * 0.15; 
+                            else if (phase >= 0.22 && phase < 0.24) v = 0.95;  
+                            else if (phase >= 0.24 && phase < 0.28) {
+                                const sTrough = -0.2; const progress = (phase - 0.24) / 0.04;
+                                if (progress < 0.5) v = 0.95 - (progress * 2) * (0.95 - sTrough);
+                                else v = sTrough + ((progress - 0.5) * 2) * (stOffset - sTrough);
+                            }
+                            else if (phase >= 0.28 && phase <= 0.4) v = stOffset; 
+                            else if (phase > 0.4 && phase <= 0.55) {
+                                const baseTAmp = state.tWaveInverted ? -0.2 : 0.15; 
+                                const tAmp = baseTAmp + (state.st * 0.04); 
+                                const theta = (phase - 0.4) * (Math.PI / 0.15);
+                                const smoothBaseline = stOffset * (1 + Math.cos(theta)) / 2;
+                                v = smoothBaseline + Math.sin(theta) * tAmp;
+                            }
+                        }
+                    }
+                    y = baselineY - (v * h * 0.5); 
+                    ctx.strokeStyle = '#00ff00';
+                }
+                else if (key === 'spo2') {
+                    const beatDuration = 60 / state.hr; const phase = (timeSec % beatDuration) / beatDuration;
+                    let v = 0;
+                    if (phase < 0.3) v = Math.sin((phase / 0.3) * (Math.PI / 2)); 
+                    else if (phase < 0.5) v = 1.0 - ((phase - 0.3) / 0.2) * 0.6; 
+                    else v = 0.4 + Math.sin(((phase - 0.5) / 0.5) * Math.PI) * 0.2; 
+                    y = h * 0.8 - (v * h * 0.6); ctx.strokeStyle = '#00ffff';
+                }
+                else if (key === 'etco2') {
+                    const effRR = (state.etco2Pattern === 'autotrigger') ? state.rr * 2 : state.rr;
+                    const respDuration = (60 / effRR) / 3;
+                    const phase = (timeSec % respDuration) / respDuration;
+                    const cycleIndex = Math.floor(timeSec / respDuration);
+
+                    let v = 0;
+                    if (state.selfBreathing) {
+                        if (cycleIndex !== lastEtco2Cycle) {
+                            lastEtco2Cycle = cycleIndex;
+                            const pseudoRandom = Math.sin(cycleIndex * 99.17) * 10000;
+                            const randomEtCO2 = 10 + Math.floor((pseudoRandom - Math.floor(pseudoRandom)) * 15);
+                            DOM.valEtCO2.innerText = randomEtCO2;
+                        }
+                        const currentVal = parseInt(DOM.valEtCO2.innerText) || 18;
+                        const breathNoise = Math.sin(cycleIndex * 14.3) * 0.15;
+                        v = CapnographyRenderer.calculate(phase, state.etco2Pattern, state.cleftDepth, timeSec);
+                        const amp = (currentVal / 80) * (1 + breathNoise * 0.2);
+                        y = h * 0.92 - (v * h * 0.9 * amp);
+                    } else {
+                        if (DOM.valEtCO2.innerText != state.etco2) {
+                            DOM.valEtCO2.innerText = state.etco2;
+                        }
+                        v = CapnographyRenderer.calculate(phase, state.etco2Pattern, state.cleftDepth, timeSec);
+                        const amp = state.etco2 / 80;
+                        y = h * 0.9 - (v * h * 0.98 * amp);
+                    }
+                    ctx.strokeStyle = '#ffffff';
+                }
+                else if (key === 'rr') {
+                    if (state.abpMode) {
+                        const beatDuration = 60 / state.hr; const phase = (timeSec % beatDuration) / beatDuration;
+                        let v = 0;
+                        if (phase < 0.15) v = Math.sin((phase / 0.15) * (Math.PI / 2));
+                        else if (phase < 0.35) v = 1.0 - ((phase - 0.15) / 0.2) * 0.4; 
+                        else if (phase < 0.45) v = 0.6 + Math.sin(((phase - 0.35) / 0.1) * Math.PI) * 0.1;
+                        else v = 0.6 - ((phase - 0.45) / 0.55) * 0.5; 
+                        y = h * 0.85 - (v * h * 0.7); ctx.strokeStyle = '#ff0000';
+                    } else {
+                        const respDuration = (60 / state.rr) / 3; const phase = (timeSec % respDuration) / respDuration;
+                        const v = Math.sin(phase * 2 * Math.PI);
+                        y = h * 0.5 - (v * h * 0.18); ctx.strokeStyle = '#cccccc';
+                    }
+                }
+                ctx.lineWidth = 2; ctx.lineTo(scanX, y); ctx.stroke(); lastYs[key] = y;
+            }
+            animationId = requestAnimationFrame(drawWaveforms);
+        }
+
+        // ==========================================
+        // 5. 드래그, 리사이즈 및 최소화(접기)
+        // ==========================================
+        let highestZ = 20;
+
+        function makeDraggable(elmnt, handle) {
+            let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
+            const targetHandle = handle || elmnt;
+
+            targetHandle.addEventListener('pointerdown', dragStart);
+
+            function dragStart(e) {
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+                elmnt.style.zIndex = ++highestZ;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = elmnt.offsetLeft;
+                initialTop = elmnt.offsetTop;
+
+                window.addEventListener('pointermove', dragging);
+                window.addEventListener('pointerup', dragEnd);
+            }
+
+            function dragging(e) {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                elmnt.style.left = `${initialLeft + dx}px`;
+                elmnt.style.top = `${initialTop + dy}px`;
+            }
+
+            function dragEnd() {
+                window.removeEventListener('pointermove', dragging);
+                window.removeEventListener('pointerup', dragEnd);
+            }
+        }
+
+        function makeResizable(elmnt, resizer, lockAspectRatio = false, onResizeCallback = null) {
+            let startX = 0, startY = 0, initialWidth = 0, initialHeight = 0;
+
+            resizer.addEventListener('pointerdown', resizeStart);
+
+            function resizeStart(e) {
+                e.stopPropagation();
+                elmnt.style.zIndex = ++highestZ;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialWidth = elmnt.offsetWidth;
+                initialHeight = elmnt.offsetHeight;
+
+                window.addEventListener('pointermove', resizing);
+                window.addEventListener('pointerup', resizeEnd);
+            }
+
+            function resizing(e) {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                
+                let minW = 140;
+                if (elmnt.id === 'controls') minW = 220;
+                if (elmnt.id === 'monitor-wrapper') minW = 260;
+
+                let newWidth = initialWidth + dx;
+                if (newWidth < minW) newWidth = minW;
+
+                elmnt.style.width = `${newWidth}px`;
+
+                if (!lockAspectRatio) {
+                    let newHeight = initialHeight + dy;
+                    if (newHeight < 60) newHeight = 60;
+                    elmnt.style.height = `${newHeight}px`;
+                }
+
+                if (onResizeCallback) onResizeCallback();
+            }
+
+            function resizeEnd() {
+                window.removeEventListener('pointermove', resizing);
+                window.removeEventListener('pointerup', resizeEnd);
+                if (onResizeCallback) onResizeCallback();
+            }
+        }
+
+        const monitorWrapper = document.getElementById('monitor-wrapper');
+        const monitorHandle = document.getElementById('monitor-handle');
+        const monitorResizer = document.getElementById('monitor-resizer');
+
+        const controlsPanel = document.getElementById('controls');
+        const controlsHeader = document.getElementById('controls-header');
+        const controlsResizer = document.getElementById('controls-resizer');
+        const controlsBody = document.getElementById('controls-body');
+        const ctrlMinBtn = document.getElementById('ctrl-min-btn');
+
+        const qrContainer = document.getElementById('qr-container');
+        const qrHeader = document.getElementById('qr-header');
+        const qrResizer = document.getElementById('qr-resizer');
+        const qrBody = document.getElementById('qr-body');
+        const qrMinBtn = document.getElementById('qr-min-btn');
+
+        makeDraggable(monitorWrapper, monitorHandle);
+        makeDraggable(controlsPanel, controlsHeader);
+        makeDraggable(qrContainer, qrHeader);
+
+        makeResizable(monitorWrapper, monitorResizer, true);
+        makeResizable(controlsPanel, controlsResizer, false);
+        makeResizable(qrContainer, qrResizer, false, () => {
+            renderQRCode();
+        });
+
+        ctrlMinBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (controlsBody.style.display === 'none') {
+                controlsBody.style.display = 'flex';
+                controlsResizer.style.display = 'block';
+                controlsPanel.style.height = 'auto';
+                ctrlMinBtn.innerText = '−';
+            } else {
+                controlsBody.style.display = 'none';
+                controlsResizer.style.display = 'none';
+                controlsPanel.style.height = 'auto';
+                ctrlMinBtn.innerText = '+';
+            }
+        });
+
+        qrMinBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (qrBody.style.display === 'none') {
+                qrBody.style.display = 'flex';
+                qrResizer.style.display = 'block';
+                qrContainer.style.height = 'auto';
+                qrMinBtn.innerText = '−';
+                renderQRCode();
+            } else {
+                qrBody.style.display = 'none';
+                qrResizer.style.display = 'none';
+                qrContainer.style.height = 'auto';
+                qrMinBtn.innerText = '+';
+            }
+        });
+    </script>
+</body>
+</html>
