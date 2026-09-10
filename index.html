@@ -430,7 +430,7 @@
             cursor: pointer;
         }
         .alarm-limits-grid {
-            display: none; /* 🟢 접힌 상태 default */
+            display: none; /* 접힌 상태 default */
             grid-template-columns: 1fr 1fr;
             gap: 4px;
             margin-top: 2px;
@@ -454,9 +454,10 @@
             gap: 2px;
         }
         .alarm-limit-inputs input {
-            width: 26px !important;
+            width: 32px !important;
             padding: 1px !important;
             font-size: 9.5px !important;
+            cursor: ns-resize; /* 휠 조절 가능 표시 */
         }
 
         /* 🟢 시나리오 섹션 스타일 */
@@ -644,11 +645,11 @@
                     <div class="control-group" style="color:#ff0000;">
                         <div class="input-row">
                             <label>SBP (Sys):</label>
-                            <input type="number" id="input-sys" min="40" max="250" value="121" tabindex="1">
+                            <input type="number" id="input-sys" min="10" max="300" value="121" tabindex="1">
                         </div>
                         <div class="slider-row">
                             <button class="step-btn minus" data-target="ctrl-sys" data-step="5">−</button>
-                            <input type="range" id="ctrl-sys" min="40" max="250" value="121" tabindex="-1">
+                            <input type="range" id="ctrl-sys" min="10" max="300" value="121" tabindex="-1">
                             <button class="step-btn plus" data-target="ctrl-sys" data-step="5">+</button>
                         </div>
                     </div>
@@ -665,18 +666,18 @@
                         </div>
                         <!-- 🟢 DBP Sync 옵션 -->
                         <label style="font-size: 9px; color: #aaa; display: flex; align-items: center; margin-top: 1px;">
-                            <input type="checkbox" id="ctrl-dbp-sync" style="margin-right: 3px; cursor: pointer;"> DBP sync
+                            <input type="checkbox" id="ctrl-dbp-sync" style="margin-right: 3px; cursor: pointer;" checked> DBP sync
                         </label>
                     </div>
 
                     <div class="control-group ecg-color">
                         <div class="input-row">
                             <label>Heart Rate (HR):</label>
-                            <input type="number" id="input-hr" min="30" max="200" value="61" tabindex="3">
+                            <input type="number" id="input-hr" min="20" max="300" value="61" tabindex="3">
                         </div>
                         <div class="slider-row">
                             <button class="step-btn minus" data-target="ctrl-hr" data-step="3">−</button>
-                            <input type="range" id="ctrl-hr" min="30" max="200" value="61" tabindex="-1">
+                            <input type="range" id="ctrl-hr" min="20" max="300" value="61" tabindex="-1">
                             <button class="step-btn plus" data-target="ctrl-hr" data-step="3">+</button>
                         </div>
                     </div>
@@ -699,11 +700,11 @@
                     <div class="control-group spo2-color">
                         <div class="input-row">
                             <label>SpO2 (%):</label>
-                            <input type="number" id="input-spo2" min="50" max="100" value="100" tabindex="5">
+                            <input type="number" id="input-spo2" min="20" max="100" value="100" tabindex="5">
                         </div>
                         <div class="slider-row">
                             <button class="step-btn minus" data-target="ctrl-spo2" data-step="1">−</button>
-                            <input type="range" id="ctrl-spo2" min="50" max="100" value="100" tabindex="-1">
+                            <input type="range" id="ctrl-spo2" min="20" max="100" value="100" tabindex="-1">
                             <button class="step-btn plus" data-target="ctrl-spo2" data-step="1">+</button>
                         </div>
                     </div>
@@ -711,11 +712,11 @@
                     <div class="control-group etco2-color">
                         <div class="input-row">
                             <label>EtCO2:</label>
-                            <input type="number" id="input-etco2" min="10" max="80" value="34" tabindex="6">
+                            <input type="number" id="input-etco2" min="1" max="100" value="34" tabindex="6">
                         </div>
                         <div class="slider-row">
                             <button class="step-btn minus" data-target="ctrl-etco2" data-step="1">−</button>
-                            <input type="range" id="ctrl-etco2" min="10" max="80" value="34" tabindex="-1">
+                            <input type="range" id="ctrl-etco2" min="1" max="100" value="34" tabindex="-1">
                             <button class="step-btn plus" data-target="ctrl-etco2" data-step="1">+</button>
                         </div>
                     </div>
@@ -723,11 +724,11 @@
                     <div class="control-group rr-color">
                         <div class="input-row">
                             <label>Resp Rate (RR):</label>
-                            <input type="number" id="input-rr" min="4" max="60" value="10" tabindex="7">
+                            <input type="number" id="input-rr" min="2" max="40" value="10" tabindex="7">
                         </div>
                         <div class="slider-row">
                             <button class="step-btn minus" data-target="ctrl-rr" data-step="1">−</button>
-                            <input type="range" id="ctrl-rr" min="4" max="60" value="10" tabindex="-1">
+                            <input type="range" id="ctrl-rr" min="2" max="40" value="10" tabindex="-1">
                             <button class="step-btn plus" data-target="ctrl-rr" data-step="1">+</button>
                         </div>
                     </div>
@@ -735,11 +736,11 @@
                     <div class="control-group bt-color">
                         <div class="input-row">
                             <label>Body Temp (BT):</label>
-                            <input type="number" id="input-bt" min="10.0" max="40.0" step="0.1" value="36.3" tabindex="8">
+                            <input type="number" id="input-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="8">
                         </div>
                         <div class="slider-row">
                             <button class="step-btn minus" data-target="ctrl-bt" data-step="0.1">−</button>
-                            <input type="range" id="ctrl-bt" min="10.0" max="40.0" step="0.1" value="36.3" tabindex="-1">
+                            <input type="range" id="ctrl-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="-1">
                             <button class="step-btn plus" data-target="ctrl-bt" data-step="0.1">+</button>
                         </div>
                     </div>
@@ -834,61 +835,61 @@
                     <div class="alarm-limit-item" style="color:#ff0000;">
                         <label>SBP</label>
                         <div class="alarm-limit-inputs">
-                            <input type="number" id="limit-sys-low" value="40">
+                            <input type="number" id="limit-sys-low" value="90" step="1">
                             <span>-</span>
-                            <input type="number" id="limit-sys-high" value="250">
+                            <input type="number" id="limit-sys-high" value="150" step="1">
                         </div>
                     </div>
                     <!-- HR -->
                     <div class="alarm-limit-item ecg-color">
                         <label>HR</label>
                         <div class="alarm-limit-inputs">
-                            <input type="number" id="limit-hr-low" value="30">
+                            <input type="number" id="limit-hr-low" value="50" step="1">
                             <span>-</span>
-                            <input type="number" id="limit-hr-high" value="200">
+                            <input type="number" id="limit-hr-high" value="120" step="1">
                         </div>
                     </div>
                     <!-- ST -->
                     <div class="alarm-limit-item ecg-color">
                         <label>ST (mV)</label>
                         <div class="alarm-limit-inputs">
-                            <input type="number" id="limit-st-dep" step="0.1" value="-3.0">
+                            <input type="number" id="limit-st-dep" step="0.1" value="-1.0">
                             <span>-</span>
-                            <input type="number" id="limit-st-elev" step="0.1" value="6.0">
+                            <input type="number" id="limit-st-elev" step="0.1" value="2.0">
                         </div>
                     </div>
                     <!-- SpO2 -->
                     <div class="alarm-limit-item spo2-color">
                         <label>SpO2 (≥)</label>
                         <div class="alarm-limit-inputs">
-                            <input type="number" id="limit-spo2-low" value="50" style="width:40px !important;">
+                            <input type="number" id="limit-spo2-low" value="95" step="1">
                         </div>
                     </div>
                     <!-- EtCO2 -->
                     <div class="alarm-limit-item etco2-color">
                         <label>EtCO2</label>
                         <div class="alarm-limit-inputs">
-                            <input type="number" id="limit-etco2-low" value="10">
+                            <input type="number" id="limit-etco2-low" value="30" step="1">
                             <span>-</span>
-                            <input type="number" id="limit-etco2-high" value="80">
+                            <input type="number" id="limit-etco2-high" value="50" step="1">
                         </div>
                     </div>
                     <!-- RR -->
                     <div class="alarm-limit-item rr-color">
                         <label>RR</label>
                         <div class="alarm-limit-inputs">
-                            <input type="number" id="limit-rr-low" value="4">
+                            <input type="number" id="limit-rr-low" value="8" step="1">
                             <span>-</span>
-                            <input type="number" id="limit-rr-high" value="60">
+                            <input type="number" id="limit-rr-high" value="30" step="1">
                         </div>
                     </div>
                     <!-- BT -->
                     <div class="alarm-limit-item bt-color" style="grid-column: 1 / -1;">
                         <label>BT (℃)</label>
                         <div class="alarm-limit-inputs">
-                            <input type="number" id="limit-bt-low" step="0.1" value="10.0">
+                            <input type="number" id="limit-bt-low" step="0.1" value="35.5">
                             <span>-</span>
-                            <input type="number" id="limit-bt-high" step="0.1" value="40.0">
+                            <input type="number" id="limit-bt-high" step="0.1" value="37.5">
                         </div>
                     </div>
                 </div>
@@ -955,17 +956,17 @@
         const DEFAULT_INITIAL_STATE = {
             bt: 36.3, hr: 61, spo2: 100, etco2: 34, rr: 10,
             sys: 121, dia: 79, st: 0.0, tWaveInverted: false, abpMode: false,
-            selfBreathing: false, rhythm: 'normal', dbpSync: false,
+            selfBreathing: false, rhythm: 'normal', dbpSync: true, // DBP Sync Default ON
             etco2Pattern: 'normal', cleftDepth: 0.4,
             isMuted: false, volume: 100, monitorStatus: 'standby',
             limits: {
-                sysLow: 40, sysHigh: 250,
-                hrLow: 30, hrHigh: 200,
-                stDep: -3.0, stElev: 6.0,
-                spo2Low: 50,
-                etco2Low: 10, etco2High: 80,
-                rrLow: 4, rrHigh: 60,
-                btLow: 10.0, btHigh: 40.0
+                sysLow: 90, sysHigh: 150,
+                hrLow: 50, hrHigh: 120,
+                stDep: -1.0, stElev: 2.0,
+                spo2Low: 95,
+                etco2Low: 30, etco2High: 50,
+                rrLow: 8, rrHigh: 30,
+                btLow: 35.5, btHigh: 37.5
             }
         };
 
@@ -1129,7 +1130,7 @@
                     DOM.ctrlTWave.checked = !!state.tWaveInverted;
                     DOM.ctrlABP.checked = !!state.abpMode;
                     DOM.ctrlSelfBreathing.checked = !!state.selfBreathing;
-                    DOM.ctrlDbpSync.checked = (state.dbpSync !== undefined) ? !!state.dbpSync : false;
+                    DOM.ctrlDbpSync.checked = (state.dbpSync !== undefined) ? !!state.dbpSync : true;
                     DOM.ctrlRhythm.value = state.rhythm || 'normal';
                     DOM.ctrlEtco2Pattern.value = state.etco2Pattern || 'normal';
                     DOM.ctrlCleftDepth.value = state.cleftDepth || 0.4;
@@ -1255,11 +1256,11 @@
             if (state.limits) {
                 DOM.limSysLow.value = state.limits.sysLow; DOM.limSysHigh.value = state.limits.sysHigh;
                 DOM.limHrLow.value = state.limits.hrLow; DOM.limHrHigh.value = state.limits.hrHigh;
-                DOM.limStDep.value = state.limits.stDep; DOM.limStElev.value = state.limits.stElev;
+                DOM.limStDep.value = state.limits.stDep.toFixed(1); DOM.limStElev.value = state.limits.stElev.toFixed(1);
                 DOM.limSpo2Low.value = state.limits.spo2Low;
                 DOM.limEtco2Low.value = state.limits.etco2Low; DOM.limEtco2High.value = state.limits.etco2High;
                 DOM.limRrLow.value = state.limits.rrLow; DOM.limRrHigh.value = state.limits.rrHigh;
-                DOM.limBtLow.value = state.limits.btLow; DOM.limBtHigh.value = state.limits.btHigh;
+                DOM.limBtLow.value = state.limits.btLow.toFixed(1); DOM.limBtHigh.value = state.limits.btHigh.toFixed(1);
             }
 
             if (muteMsg) muteMsg.style.display = state.isMuted ? 'block' : 'none';
@@ -1277,7 +1278,7 @@
         }
 
         function applySysChange(newSys) {
-            state.sys = Math.max(40, Math.min(250, newSys));
+            state.sys = Math.max(10, Math.min(300, newSys));
             if (state.dbpSync) {
                 state.dia = Math.max(20, Math.min(180, Math.round(state.sys * 2 / 3)));
                 DOM.ctrlDia.value = state.dia;
@@ -1302,6 +1303,21 @@
         attachLimitInputEvent(DOM.limEtco2Low, 'etco2Low'); attachLimitInputEvent(DOM.limEtco2High, 'etco2High');
         attachLimitInputEvent(DOM.limRrLow, 'rrLow'); attachLimitInputEvent(DOM.limRrHigh, 'rrHigh');
         attachLimitInputEvent(DOM.limBtLow, 'btLow', true); attachLimitInputEvent(DOM.limBtHigh, 'btHigh', true);
+
+        // 🟢 알람 리밋 패널의 마우스 휠 조절 이벤트 적용
+        document.querySelectorAll('.alarm-limit-inputs input').forEach(input => {
+            input.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const direction = e.deltaY < 0 ? 1 : -1;
+                const step = parseFloat(this.getAttribute('step')) || 1;
+                let val = parseFloat(this.value);
+                if (isNaN(val)) val = 0;
+                
+                let newValue = val + (direction * step);
+                this.value = step < 1 ? newValue.toFixed(1) : Math.round(newValue);
+                this.dispatchEvent(new Event('change'));
+            }, { passive: false });
+        });
 
         // 🟢 알람 한계치 서브패널 접기/펼치기 토글
         DOM.btnToggleLimits.addEventListener('click', () => {
@@ -1357,8 +1373,8 @@
         // 🟢 Worsening Condition
         DOM.btnWorsen.addEventListener('click', () => {
             applySysChange(parseInt(state.sys) - 5);
-            state.hr = Math.max(60, Math.min(120, parseInt(state.hr) + 2));
-            state.etco2 = Math.max(28, Math.min(38, parseInt(state.etco2) - 1));
+            state.hr = Math.max(20, Math.min(300, parseInt(state.hr) + 2));
+            state.etco2 = Math.max(1, Math.min(100, parseInt(state.etco2) - 1));
             updateDisplay();
             syncToFirebase({ sys: state.sys, dia: state.dia, hr: state.hr, etco2: state.etco2 });
             checkAutoAlarms();
@@ -1367,8 +1383,8 @@
         // 🟢 Improving Condition
         DOM.btnImprove.addEventListener('click', () => {
             applySysChange(parseInt(state.sys) + 5);
-            state.hr = Math.max(60, Math.min(120, parseInt(state.hr) - 2));
-            state.etco2 = Math.max(28, Math.min(38, parseInt(state.etco2) + 1));
+            state.hr = Math.max(20, Math.min(300, parseInt(state.hr) - 2));
+            state.etco2 = Math.max(1, Math.min(100, parseInt(state.etco2) + 1));
             updateDisplay();
             syncToFirebase({ sys: state.sys, dia: state.dia, hr: state.hr, etco2: state.etco2 });
             checkAutoAlarms();
@@ -1609,10 +1625,10 @@
             }, { passive: false });
         }
 
-        setupMonitorWheel('val-bt', 'bt', 10.0, 40.0, 0.1); setupMonitorWheel('val-hr', 'hr', 30, 200, 1);
-        setupMonitorWheel('val-st', 'st', -3.0, 3.0, 0.1); setupMonitorWheel('val-spo2', 'spo2', 50, 100, 1);
-        setupMonitorWheel('val-etco2', 'etco2', 10, 80, 1); setupMonitorWheel('val-rr', 'rr', 4, 60, 1);
-        setupMonitorWheel('val-sys', 'sys', 40, 250, 1); setupMonitorWheel('val-dia', 'dia', 20, 180, 1);
+        setupMonitorWheel('val-bt', 'bt', 30.0, 45.0, 0.1); setupMonitorWheel('val-hr', 'hr', 20, 300, 1);
+        setupMonitorWheel('val-st', 'st', -3.0, 6.0, 0.1); setupMonitorWheel('val-spo2', 'spo2', 20, 100, 1);
+        setupMonitorWheel('val-etco2', 'etco2', 1, 100, 1); setupMonitorWheel('val-rr', 'rr', 2, 40, 1);
+        setupMonitorWheel('val-sys', 'sys', 10, 300, 1); setupMonitorWheel('val-dia', 'dia', 20, 180, 1);
 
         const inputs = document.querySelectorAll('input[type="range"]');
         inputs.forEach(input => {
