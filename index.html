@@ -44,7 +44,7 @@
         }
 
         #monitor-handle {
-            position: absolute;
+            position: absolute; 
             top: 0;
             left: 0;
             width: 100%;
@@ -312,6 +312,23 @@
         .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
         .input-row label { font-size: 9.5px; margin: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* 🟢 컨트롤러 제목 라벨 알람 트리거 스타일 */
+        .ctrl-title-btn {
+            cursor: pointer;
+            transition: 0.15s ease;
+            user-select: none;
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+        .ctrl-title-btn:hover {
+            filter: brightness(1.4);
+            text-shadow: 0 0 6px currentColor;
+            background: rgba(255,255,255,0.08);
+        }
+        .ctrl-title-btn:active {
+            transform: scale(0.95);
+        }
+
         .slider-row {
             display: flex;
             align-items: center;
@@ -430,7 +447,7 @@
             cursor: pointer;
         }
         .alarm-limits-grid {
-            display: none; /* 접힌 상태 default */
+            display: none; 
             grid-template-columns: 1fr 1fr;
             gap: 4px;
             margin-top: 2px;
@@ -457,7 +474,7 @@
             width: 32px !important;
             padding: 1px !important;
             font-size: 9.5px !important;
-            cursor: ns-resize; /* 휠 조절 가능 표시 */
+            cursor: ns-resize;
         }
 
         /* 🟢 시나리오 섹션 스타일 */
@@ -616,7 +633,6 @@
             <div style="display: flex; align-items: center; gap: 3px; flex-wrap: wrap; flex: 1; min-width: 0;">
                 <div class="panel-title" style="font-size: 12.5px;">Control Panel</div>
                 <div id="connection-status" style="font-size: 9.5px; font-weight: bold; color: #ff0000; padding: 1px 3px; border-radius: 3px; background: rgba(0,0,0,0.3);">Disconnected</div>
-                <!-- 🟢 상단 Start / Standby / Mute / Volume 버튼들 -->
                 <button id="btn-panel-start" class="panel-top-btn" style="background:#28a745; color:#fff;">Start</button>
                 <button id="btn-panel-standby" class="panel-top-btn" style="background:#ffc107; color:#000;">Stand by</button>
                 <button id="btn-panel-mute" class="panel-top-btn" style="background:#6c757d; color:#fff;">Mute</button>
@@ -644,7 +660,7 @@
                 <div class="controls-col">
                     <div class="control-group" style="color:#ff0000;">
                         <div class="input-row">
-                            <label>SBP (Sys):</label>
+                            <label class="ctrl-title-btn" data-alarm-target="nbp" title="클릭 시 모니터에 알람 3회 표출">SBP (Sys):</label>
                             <input type="number" id="input-sys" min="10" max="300" value="121" tabindex="1">
                         </div>
                         <div class="slider-row">
@@ -656,7 +672,7 @@
                     
                     <div class="control-group" style="color:#ff0000;">
                         <div class="input-row">
-                            <label>DBP (Dia):</label>
+                            <label class="ctrl-title-btn" data-alarm-target="nbp" title="클릭 시 모니터에 알람 3회 표출">DBP (Dia):</label>
                             <input type="number" id="input-dia" min="20" max="180" value="79" tabindex="2">
                         </div>
                         <div class="slider-row">
@@ -664,7 +680,6 @@
                             <input type="range" id="ctrl-dia" min="20" max="180" value="79" tabindex="-1">
                             <button class="step-btn plus" data-target="ctrl-dia" data-step="5">+</button>
                         </div>
-                        <!-- 🟢 DBP Sync 옵션 -->
                         <label style="font-size: 9px; color: #aaa; display: flex; align-items: center; margin-top: 1px;">
                             <input type="checkbox" id="ctrl-dbp-sync" style="margin-right: 3px; cursor: pointer;" checked> DBP sync
                         </label>
@@ -672,7 +687,7 @@
 
                     <div class="control-group ecg-color">
                         <div class="input-row">
-                            <label>Heart Rate (HR):</label>
+                            <label class="ctrl-title-btn" data-alarm-target="hr" title="클릭 시 모니터에 알람 3회 표출">Heart Rate (HR):</label>
                             <input type="number" id="input-hr" min="20" max="300" value="61" tabindex="3">
                         </div>
                         <div class="slider-row">
@@ -684,7 +699,7 @@
                     
                     <div class="control-group ecg-color">
                         <div class="input-row">
-                            <label>ST Level:</label>
+                            <label class="ctrl-title-btn" data-alarm-target="hr" title="클릭 시 모니터에 알람 3회 표출">ST Level:</label>
                             <input type="number" id="input-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="4">
                         </div>
                         <div class="slider-row">
@@ -699,7 +714,7 @@
                 <div class="controls-col">
                     <div class="control-group spo2-color">
                         <div class="input-row">
-                            <label>SpO2 (%):</label>
+                            <label class="ctrl-title-btn" data-alarm-target="spo2" title="클릭 시 모니터에 알람 3회 표출">SpO2 (%):</label>
                             <input type="number" id="input-spo2" min="20" max="100" value="100" tabindex="5">
                         </div>
                         <div class="slider-row">
@@ -711,7 +726,7 @@
 
                     <div class="control-group etco2-color">
                         <div class="input-row">
-                            <label>EtCO2:</label>
+                            <label class="ctrl-title-btn" data-alarm-target="etco2" title="클릭 시 모니터에 알람 3회 표출">EtCO2:</label>
                             <input type="number" id="input-etco2" min="1" max="100" value="34" tabindex="6">
                         </div>
                         <div class="slider-row">
@@ -723,7 +738,7 @@
 
                     <div class="control-group rr-color">
                         <div class="input-row">
-                            <label>Resp Rate (RR):</label>
+                            <label class="ctrl-title-btn" data-alarm-target="rr" title="클릭 시 모니터에 알람 3회 표출">Resp Rate (RR):</label>
                             <input type="number" id="input-rr" min="2" max="40" value="10" tabindex="7">
                         </div>
                         <div class="slider-row">
@@ -735,7 +750,7 @@
 
                     <div class="control-group bt-color">
                         <div class="input-row">
-                            <label>Body Temp (BT):</label>
+                            <label class="ctrl-title-btn" data-alarm-target="bt" title="클릭 시 모니터에 알람 3회 표출">Body Temp (BT):</label>
                             <input type="number" id="input-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="8">
                         </div>
                         <div class="slider-row">
@@ -909,6 +924,8 @@
                     <button type="button" class="btn-scenario" onclick="applyRCPreset('4-2')">#4-2</button>
                     <button type="button" class="btn-scenario" onclick="applyRCPreset('5-1')">#5-1</button>
                     <button type="button" class="btn-scenario" onclick="applyRCPreset('5-2')">#5-2</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('6-1')">#6-1</button>
+                    <button type="button" class="btn-scenario" onclick="applyRCPreset('6-2')">#6-2</button>
                 </div>
             </div>
 
@@ -956,7 +973,7 @@
         const DEFAULT_INITIAL_STATE = {
             bt: 36.3, hr: 61, spo2: 100, etco2: 34, rr: 10,
             sys: 121, dia: 79, st: 0.0, tWaveInverted: false, abpMode: false,
-            selfBreathing: false, rhythm: 'normal', dbpSync: true, // DBP Sync Default ON
+            selfBreathing: false, rhythm: 'normal', dbpSync: true,
             etco2Pattern: 'normal', cleftDepth: 0.4,
             isMuted: false, volume: 100, monitorStatus: 'standby',
             limits: {
@@ -1119,6 +1136,26 @@
                 renderQRCode();
             }
 
+            // 🟢 Firebase 알람 이벤트 수신 (원격 컨트롤러 트리거 지원)
+            currentSessionRef.child('alarmTrigger').on('value', (snap) => {
+                const triggerData = snap.val();
+                if (!triggerData || !triggerData.target) return;
+                
+                // 3초 이내에 전송된 알람만 처리하여 재접속 시 이전 알람 중복 실행 방지
+                if (Date.now() - triggerData.timestamp < 3000) {
+                    const targetBoxes = {
+                        nbp: DOM.boxValNBP,
+                        hr: DOM.boxValHR,
+                        spo2: DOM.boxValSpO2,
+                        etco2: DOM.boxValEtCO2,
+                        rr: DOM.boxValRR,
+                        bt: DOM.boxValBT
+                    };
+                    const targetEl = targetBoxes[triggerData.target];
+                    if (targetEl) triggerManualAlarm(targetEl);
+                }
+            });
+
             currentSessionRef.on('value', (snapshot) => {
                 if (snapshot.exists()) {
                     state = Object.assign(state, snapshot.val());
@@ -1220,6 +1257,9 @@
         }
         connectSession(sessionId);
 
+        // ==========================================
+        // 3. 화면 UI 표시 및 Apply 분리 로직
+        // ==========================================
         function updateDisplay() {
             DOM.valBT.innerText = parseFloat(state.bt).toFixed(1);
             DOM.valHR.innerText = state.hr;
@@ -1234,19 +1274,29 @@
             let diaValue = parseInt(state.dia);
             document.getElementById('val-mean').innerText = Math.round((sysValue + 2 * diaValue) / 3);
     
-            DOM.inBT.value = parseFloat(state.bt).toFixed(1);
-            DOM.inHR.value = state.hr;
-            DOM.inSpO2.value = state.spo2;
-            DOM.inEtCO2.value = state.etco2;
-            DOM.inRR.value = state.rr;
-            DOM.inSys.value = state.sys;
-            DOM.inDia.value = state.dia;
-            DOM.inST.value = parseFloat(state.st).toFixed(1);
+            const activeId = document.activeElement ? document.activeElement.id : '';
+            const vitalInputIds = ['input-bt', 'input-hr', 'input-spo2', 'input-etco2', 'input-rr', 'input-sys', 'input-dia', 'input-st'];
+            
+            if (!vitalInputIds.includes(activeId)) {
+                DOM.inBT.value = parseFloat(state.bt).toFixed(1);
+                DOM.inHR.value = state.hr;
+                DOM.inSpO2.value = state.spo2;
+                DOM.inEtCO2.value = state.etco2;
+                DOM.inRR.value = state.rr;
+                DOM.inSys.value = state.sys;
+                DOM.inDia.value = state.dia;
+                DOM.inST.value = parseFloat(state.st).toFixed(1);
 
-            DOM.ctrlBT.value = state.bt; DOM.ctrlHR.value = state.hr;
-            DOM.ctrlSpO2.value = state.spo2; DOM.ctrlEtCO2.value = state.etco2;
-            DOM.ctrlRR.value = state.rr; DOM.ctrlSys.value = state.sys;
-            DOM.ctrlDia.value = state.dia; DOM.ctrlST.value = state.st;
+                DOM.ctrlBT.value = state.bt; 
+                DOM.ctrlHR.value = state.hr;
+                DOM.ctrlSpO2.value = state.spo2; 
+                DOM.ctrlEtCO2.value = state.etco2;
+                DOM.ctrlRR.value = state.rr; 
+                DOM.ctrlSys.value = state.sys;
+                DOM.ctrlDia.value = state.dia; 
+                DOM.ctrlST.value = state.st;
+            }
+
             DOM.ctrlDbpSync.checked = !!state.dbpSync;
             DOM.ctrlEtco2Pattern.value = state.etco2Pattern || 'normal';
             DOM.ctrlCleftDepth.value = state.cleftDepth || 0.4;
@@ -1277,11 +1327,74 @@
             if (currentSessionRef) currentSessionRef.update(updates);
         }
 
+        // 🟢 원격/로컬 공용 알람 트리거 함수
+        function triggerManualAlarmRemote(targetKey) {
+            const targetBoxes = {
+                nbp: DOM.boxValNBP,
+                hr: DOM.boxValHR,
+                spo2: DOM.boxValSpO2,
+                etco2: DOM.boxValEtCO2,
+                rr: DOM.boxValRR,
+                bt: DOM.boxValBT
+            };
+            const targetEl = targetBoxes[targetKey];
+            if (targetEl) triggerManualAlarm(targetEl);
+
+            if (currentSessionRef) {
+                currentSessionRef.child('alarmTrigger').set({
+                    target: targetKey,
+                    timestamp: Date.now()
+                });
+            }
+        }
+
+        // 🟢 컨트롤러 라벨(수치 제목) 클릭 시 알람 트리거 리스너 등록
+        document.querySelectorAll('.ctrl-title-btn').forEach(label => {
+            label.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const targetKey = label.getAttribute('data-alarm-target');
+                if (targetKey) {
+                    triggerManualAlarmRemote(targetKey);
+                }
+            });
+        });
+
         function applySysChange(newSys) {
             state.sys = Math.max(10, Math.min(300, newSys));
             if (state.dbpSync) {
                 state.dia = Math.max(20, Math.min(180, Math.round(state.sys * 2 / 3)));
                 DOM.ctrlDia.value = state.dia;
+            }
+        }
+
+        function updateLocalControl(name, value, isFloat = false) {
+            let val = isFloat ? parseFloat(value) : parseInt(value);
+            if (isNaN(val)) return;
+
+            const map = {
+                sys: { input: DOM.inSys, slider: DOM.ctrlSys, min: 10, max: 300 },
+                dia: { input: DOM.inDia, slider: DOM.ctrlDia, min: 20, max: 180 },
+                hr:  { input: DOM.inHR,  slider: DOM.ctrlHR,  min: 20, max: 300 },
+                st:  { input: DOM.inST,  slider: DOM.ctrlST,  min: -3.0, max: 6.0 },
+                spo2:{ input: DOM.inSpO2,slider: DOM.ctrlSpO2,min: 20, max: 100 },
+                etco2:{input: DOM.inEtCO2,slider: DOM.ctrlEtCO2,min: 1, max: 100 },
+                rr:  { input: DOM.inRR,  slider: DOM.ctrlRR,  min: 2, max: 40 },
+                bt:  { input: DOM.inBT,  slider: DOM.ctrlBT,  min: 30.0, max: 45.0 }
+            };
+
+            const item = map[name];
+            if (!item) return;
+
+            val = Math.max(item.min, Math.min(item.max, val));
+            const formatted = isFloat ? val.toFixed(1) : Math.round(val);
+
+            item.input.value = formatted;
+            item.slider.value = formatted;
+
+            if (name === 'sys' && DOM.ctrlDbpSync.checked) {
+                const autoDia = Math.max(20, Math.min(180, Math.round(val * 2 / 3)));
+                DOM.inDia.value = autoDia;
+                DOM.ctrlDia.value = autoDia;
             }
         }
 
@@ -1304,7 +1417,6 @@
         attachLimitInputEvent(DOM.limRrLow, 'rrLow'); attachLimitInputEvent(DOM.limRrHigh, 'rrHigh');
         attachLimitInputEvent(DOM.limBtLow, 'btLow', true); attachLimitInputEvent(DOM.limBtHigh, 'btHigh', true);
 
-        // 🟢 알람 리밋 패널의 마우스 휠 조절 이벤트 적용
         document.querySelectorAll('.alarm-limit-inputs input').forEach(input => {
             input.addEventListener('wheel', function(e) {
                 e.preventDefault();
@@ -1319,7 +1431,6 @@
             }, { passive: false });
         });
 
-        // 🟢 알람 한계치 서브패널 접기/펼치기 토글
         DOM.btnToggleLimits.addEventListener('click', () => {
             if (DOM.alarmLimitsBody.style.display === 'grid') {
                 DOM.alarmLimitsBody.style.display = 'none';
@@ -1338,7 +1449,8 @@
             state.etco2 = parseInt(DOM.inEtCO2.value) || state.etco2; 
             state.rr = parseInt(DOM.inRR.value) || state.rr;
             state.cleftDepth = parseFloat(DOM.inCleftDepth.value) || state.cleftDepth;
-            
+            state.dbpSync = DOM.ctrlDbpSync.checked;
+
             applySysChange(parseInt(DOM.inSys.value) || state.sys);
             if (!state.dbpSync) {
                 state.dia = parseInt(DOM.inDia.value) || state.dia;
@@ -1349,7 +1461,6 @@
             checkAutoAlarms();
         });
 
-        // 🟢 Reset 버튼 클릭 시 초기 V/S 복구
         DOM.btnReset.addEventListener('click', () => {
             const currentStatus = state.monitorStatus;
             const currentVol = state.volume;
@@ -1370,7 +1481,6 @@
             checkAutoAlarms();
         });
 
-        // 🟢 Worsening Condition
         DOM.btnWorsen.addEventListener('click', () => {
             applySysChange(parseInt(state.sys) - 5);
             state.hr = Math.max(20, Math.min(300, parseInt(state.hr) + 2));
@@ -1380,7 +1490,6 @@
             checkAutoAlarms();
         });
 
-        // 🟢 Improving Condition
         DOM.btnImprove.addEventListener('click', () => {
             applySysChange(parseInt(state.sys) + 5);
             state.hr = Math.max(20, Math.min(300, parseInt(state.hr) - 2));
@@ -1390,7 +1499,6 @@
             checkAutoAlarms();
         });
 
-        // 🟢 [RC 시나리오 프리셋] - 모든 프리셋 DBP Sync 적용
         function applyRCPreset(presetKey) {
             const presets = {
                 '1-1': { sys: 124, hr: 60, spo2: 98,  etco2: 42, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
@@ -1401,15 +1509,16 @@
                 '3-2': { sys: 93,  hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
                 '4-1': { sys: 132, hr: 81, spo2: 98,  etco2: 41, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
                 '4-2': { sys: 125, hr: 82, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '5-1': { sys: 152, hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '5-2': { sys: 93,  hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true }
+                '5-1': { sys: 117, dia: 78, hr: 81, spo2: 99,  etco2: 39, etco2Pattern: 'curare', rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: true, abpMode: false, dbpSync: true },
+                '5-2': { sys: 115, dia: 77, hr: 85, spo2: 100, etco2: 36, etco2Pattern: 'normal', rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '6-1': { sys: 152, hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
+                '6-2': { sys: 93,  hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true }
             };
 
             const selected = presets[String(presetKey)];
             if (selected) {
                 Object.assign(state, selected);
                 
-                // DBP Sync가 켜져 있으면 SBP 기반으로 DBP 자동 계산 적용
                 if (state.dbpSync) {
                     applySysChange(state.sys);
                 }
@@ -1434,53 +1543,55 @@
             btn.addEventListener('click', (e) => {
                 const targetId = e.target.getAttribute('data-target');
                 const step = parseFloat(e.target.getAttribute('data-step'));
-                const input = document.getElementById(targetId);
+                const slider = document.getElementById(targetId);
                 const isPlus = e.target.classList.contains('plus');
                 
-                let newVal = parseFloat(input.value) + (isPlus ? step : -step);
-                const min = parseFloat(input.min);
-                const max = parseFloat(input.max);
-                if(newVal < min) newVal = min;
-                if(newVal > max) newVal = max;
-                
-                input.value = step < 1 ? newVal.toFixed(1) : Math.round(newVal);
-                input.dispatchEvent(new Event('input')); 
+                let newVal = parseFloat(slider.value) + (isPlus ? step : -step);
+                const isFloat = step < 1;
+                const name = targetId.replace('ctrl-', '');
+
+                updateLocalControl(name, newVal, isFloat);
             });
         });
 
-        DOM.ctrlBT.oninput = (e) => { state.bt = parseFloat(e.target.value); updateDisplay(); syncToFirebase({bt: state.bt}); checkAutoAlarms(); };
-        DOM.ctrlHR.oninput = (e) => { state.hr = parseInt(e.target.value); updateDisplay(); syncToFirebase({hr: state.hr}); checkAutoAlarms(); };
-        DOM.ctrlSpO2.oninput = (e) => { state.spo2 = parseInt(e.target.value); updateDisplay(); syncToFirebase({spo2: state.spo2}); checkAutoAlarms(); };
-        DOM.ctrlEtCO2.oninput = (e) => { state.etco2 = parseInt(e.target.value); updateDisplay(); syncToFirebase({etco2: state.etco2}); checkAutoAlarms(); };
-        DOM.ctrlRR.oninput = (e) => { state.rr = parseInt(e.target.value); updateDisplay(); syncToFirebase({rr: state.rr}); checkAutoAlarms(); };
-        DOM.ctrlST.oninput = (e) => { state.st = parseFloat(e.target.value); updateDisplay(); syncToFirebase({st: state.st}); checkAutoAlarms(); };
-        DOM.ctrlCleftDepth.oninput = (e) => { state.cleftDepth = parseFloat(e.target.value); DOM.inCleftDepth.value = state.cleftDepth; syncToFirebase({cleftDepth: state.cleftDepth}); };
-
-        DOM.ctrlSys.oninput = (e) => { 
-            applySysChange(parseInt(e.target.value)); 
-            updateDisplay(); 
-            syncToFirebase({sys: state.sys, dia: state.dia}); 
-            checkAutoAlarms();
+        DOM.ctrlSys.oninput  = (e) => updateLocalControl('sys', e.target.value);
+        DOM.ctrlDia.oninput  = (e) => {
+            if (DOM.ctrlDbpSync.checked) DOM.ctrlDbpSync.checked = false;
+            updateLocalControl('dia', e.target.value);
         };
-        
-        DOM.ctrlDia.oninput = (e) => { 
-            state.dia = parseInt(e.target.value); 
-            if(state.dbpSync) {
-                state.dbpSync = false;
-                DOM.ctrlDbpSync.checked = false;
-                syncToFirebase({dbpSync: false});
-            }
-            updateDisplay(); 
-            syncToFirebase({dia: state.dia}); 
+        DOM.ctrlHR.oninput   = (e) => updateLocalControl('hr', e.target.value);
+        DOM.ctrlST.oninput   = (e) => updateLocalControl('st', e.target.value, true);
+        DOM.ctrlSpO2.oninput = (e) => updateLocalControl('spo2', e.target.value);
+        DOM.ctrlEtCO2.oninput= (e) => updateLocalControl('etco2', e.target.value);
+        DOM.ctrlRR.oninput   = (e) => updateLocalControl('rr', e.target.value);
+        DOM.ctrlBT.oninput   = (e) => updateLocalControl('bt', e.target.value, true);
+
+        DOM.inSys.oninput   = (e) => updateLocalControl('sys', e.target.value);
+        DOM.inDia.oninput   = (e) => {
+            if (DOM.ctrlDbpSync.checked) DOM.ctrlDbpSync.checked = false;
+            updateLocalControl('dia', e.target.value);
+        };
+        DOM.inHR.oninput    = (e) => updateLocalControl('hr', e.target.value);
+        DOM.inST.oninput    = (e) => updateLocalControl('st', e.target.value, true);
+        DOM.inSpO2.oninput  = (e) => updateLocalControl('spo2', e.target.value);
+        DOM.inEtCO2.oninput = (e) => updateLocalControl('etco2', e.target.value);
+        DOM.inRR.oninput    = (e) => updateLocalControl('rr', e.target.value);
+        DOM.inBT.oninput    = (e) => updateLocalControl('bt', e.target.value, true);
+
+        DOM.ctrlCleftDepth.oninput = (e) => { 
+            state.cleftDepth = parseFloat(e.target.value); 
+            DOM.inCleftDepth.value = state.cleftDepth; 
+            syncToFirebase({cleftDepth: state.cleftDepth}); 
         };
 
         DOM.ctrlDbpSync.addEventListener('change', (e) => {
             state.dbpSync = e.target.checked;
             if (state.dbpSync) {
-                state.dia = Math.max(20, Math.min(180, Math.round(state.sys * 2 / 3)));
+                const curSys = parseInt(DOM.inSys.value) || state.sys;
+                const autoDia = Math.max(20, Math.min(180, Math.round(curSys * 2 / 3)));
+                DOM.inDia.value = autoDia;
+                DOM.ctrlDia.value = autoDia;
             }
-            updateDisplay();
-            syncToFirebase({ dbpSync: state.dbpSync, dia: state.dia });
         });
 
         DOM.ctrlTWave.addEventListener('change', (e) => { 
@@ -1562,7 +1673,6 @@
             syncToFirebase({ etco2Pattern: state.etco2Pattern });
         }, { passive: false });
 
-        // 🟢 패널 상단 Start 버튼 (비동기 멈춤 방지 패치)
         DOM.btnPanelStart.addEventListener('click', () => {
             state.monitorStatus = 'running';
             syncToFirebase({ monitorStatus: 'running' });
@@ -1636,24 +1746,25 @@
         setupMonitorWheel('val-etco2', 'etco2', 1, 100, 1); setupMonitorWheel('val-rr', 'rr', 2, 40, 1);
         setupMonitorWheel('val-sys', 'sys', 10, 300, 1); setupMonitorWheel('val-dia', 'dia', 20, 180, 1);
 
-        const inputs = document.querySelectorAll('input[type="range"]');
-        inputs.forEach(input => {
-            input.addEventListener('wheel', function(e) {
+        const vitalControls = [
+            DOM.ctrlSys, DOM.ctrlDia, DOM.ctrlHR, DOM.ctrlST, DOM.ctrlSpO2, DOM.ctrlEtCO2, DOM.ctrlRR, DOM.ctrlBT,
+            DOM.inSys, DOM.inDia, DOM.inHR, DOM.inST, DOM.inSpO2, DOM.inEtCO2, DOM.inRR, DOM.inBT
+        ];
+        vitalControls.forEach(elem => {
+            if (!elem) return;
+            elem.addEventListener('wheel', function(e) {
                 e.preventDefault();
-                const step = parseFloat(this.step) || 1;
+                const step = parseFloat(this.getAttribute('step')) || (this.id.includes('st') || this.id.includes('bt') ? 0.1 : 1);
                 const direction = e.deltaY < 0 ? 1 : -1;
-                let newValue = parseFloat(this.value) + (direction * step);
-                if (newValue >= parseFloat(this.min) && newValue <= parseFloat(this.max)) {
-                    this.value = step < 1 ? newValue.toFixed(1) : newValue;
-                    this.dispatchEvent(new Event('input'));
-                }
+                let newVal = parseFloat(this.value) + (direction * step);
+                const name = this.id.replace('ctrl-', '').replace('input-', '');
+                updateLocalControl(name, newVal, step < 1);
             }, { passive: false }); 
         });
 
         // ==========================================
         // 4. 모니터 시작, 알람, 파형 엔진
         // ==========================================
-
         document.getElementById('mute-btn-overlay').addEventListener('click', () => {
             state.isMuted = !state.isMuted;
             syncToFirebase({ isMuted: state.isMuted });
@@ -1664,7 +1775,6 @@
         let ekgAudioBuffer = null; 
         let alarmAudioBuffer = null; 
 
-        // 🟢 비동기 오디오 로드
         async function loadAlarmSound(url) {
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1692,7 +1802,10 @@
         }
 
         function triggerManualAlarm(boxElement) {
-            if (!boxElement || boxElement.classList.contains('alarm-active')) return; 
+            if (!boxElement) return;
+            // 이미 애니메이션 중이면 클래스를 리셋해 다시 3회 깜빡이게 처리
+            boxElement.classList.remove('alarm-active');
+            void boxElement.offsetWidth; // Reflow 트리거
             boxElement.classList.add('alarm-active');
             
             if (audioCtx && audioCtx.state === 'running' && !state.isMuted && (state.volume || 0) > 0) {
@@ -1743,7 +1856,6 @@
             if (ekgAudioBuffer) {
                 const source = audioCtx.createBufferSource();
                 source.buffer = ekgAudioBuffer;
-                
                 const gainNode = audioCtx.createGain();
                 
                 let pitchRatio = 1.0;
@@ -1754,7 +1866,6 @@
 
                 source.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-                
                 gainNode.gain.setValueAtTime(volRatio * 2.5, now); 
                 source.start(now);
             } else {
@@ -1776,7 +1887,6 @@
             }
         }
 
-        // 🟢 비동기 오디오 로딩 멈춤 방지 및 캔버스 리사이즈 타이밍 최적화
         function startMonitorLocal() {
             currentMonitorStatus = 'running';
             if(DOM.overlay) DOM.overlay.style.display = 'none';
@@ -1866,9 +1976,7 @@
         let scanX = 0; const scanSpeed = 2.5; let lastYs = { ecg: 0, spo2: 0, etco2: 0, rr: 0 };
         let lastEtco2Cycle = -1;
 
-        // ==========================================
-        // 🟢 Capnography Mathematical Models
-        // ==========================================
+        // Capnography Mathematical Models
         class CapnographyRenderer {
             static calculate(phase, pattern, cleftDepth, timeSec) {
                 let v = 0;
@@ -2135,7 +2243,7 @@
         }
 
         // ==========================================
-        // 5. 드래그, 리사이즈 및 최소화(접기)
+        // 5. 드래그, 리사이즈 및 최소화
         // ==========================================
         let highestZ = 20;
 
