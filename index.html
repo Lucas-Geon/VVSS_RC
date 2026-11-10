@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Patient Monitor Simulation</title>
+    <title>Virtual Vital Sign Simulator (VVSS) | Patient Monitor</title>
+    <meta name="description" content="Free web-based virtual vital sign and patient monitor simulator for medical education, nursing simulation, and clinical training. Real-time ECG, SpO2, Capnography, and NBP parameters.">
     
     <!-- 🟢 Firebase SDK 및 QR 라이브러리 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -246,10 +247,10 @@
         .val-box:hover { border-color: rgba(255, 255, 255, 0.4); }
 
         .val-number { font-size: 9cqh !important; font-weight: bold; line-height: 1; text-align: center; }
-        .val-title { font-size: 2.8cqh !important; font-weight: bold; margin-bottom: 0.5cqh; text-align: center; }
+        .val-title { font-size: 2.5cqh !important; font-weight: bold; margin-bottom: 0.5cqh; text-align: center; }
 
-        #nbp-box-container .val-number { font-size: 8cqh !important; margin-top: 1cqh; }
-        #nbp-box-container .val-mean { font-size: 6cqh !important; font-weight: bold; margin-top: 0.5cqh; }
+        #nbp-box-container .val-number { font-size: 7cqh !important; margin-top: 1cqh; }
+        #nbp-box-container .val-mean { font-size: 5cqh !important; font-weight: bold; margin-top: 0.5cqh; }
         #box-val-bt {flex: 0.6;}        
         #box-val-bt .val-number { font-size: 6cqh !important; }
 
@@ -479,21 +480,298 @@
             cursor: ns-resize;
         }
 
-        /* 🟢 시나리오 섹션 스타일 */
+        /* 🟢 [Scenario Preset Management] 섹션 스타일 */
         .scenario-section {
-            margin-top: 3px; padding-top: 3px; border-top: 1px dashed #555;
-            display: flex; flex-direction: column; gap: 3px;
+            margin-top: 6px;
+            padding: 8px;
+            background: #1d1d1d;
+            border: 1px solid #3d3d3d;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
         }
-        .scenario-header { font-size: 11px; font-weight: bold; color: #ffeb3b; text-align: center; letter-spacing: 1px; }
-        .scenario-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+        .scenario-header {
+            font-size: 12px;
+            font-weight: bold;
+            color: #e6db00;
+            text-align: left;
+            letter-spacing: 0.5px;
+        }
+        .preset-top-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+        }
+        #preset-set-select {
+            flex: 1.5;
+            min-width: 0;
+            background-color: #111111;
+            color: #ffea00;
+            border: 1px solid #555555;
+            border-radius: 5px;
+            padding: 5px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+        }
+        .btn-preset-ctrl {
+            background-color: #4f4f4f;
+            color: #ffffff;
+            border: 1px solid #777777;
+            border-radius: 5px;
+            padding: 5px 6px;
+            font-size: 10.5px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.15s;
+        }
+        .btn-preset-ctrl:hover {
+            background-color: #666666;
+        }
+        .btn-preset-ctrl.edit-active {
+            background-color: #ff9800;
+            color: #000000;
+            border-color: #ffc107;
+            box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);
+        }
+        .preset-io-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            width: 100%;
+        }
+        .btn-preset-import {
+            background-color: #005b6e;
+            color: #ffffff;
+            border: 1px solid #148096;
+            border-radius: 5px;
+            padding: 7px 4px;
+            font-size: 11.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-preset-import:hover {
+            background-color: #00768f;
+        }
+        .btn-preset-export {
+            background-color: #7a0000;
+            color: #ffffff;
+            border: 1px solid #a82020;
+            border-radius: 5px;
+            padding: 7px 4px;
+            font-size: 11.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-preset-export:hover {
+            background-color: #9c0000;
+        }
+
+        .scenario-divider {
+            border-top: 1px solid #333;
+            margin: 1px 0;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            min-height: 28px;
+        }
 
         .btn-scenario {
-            background-color: #333333; color: #e0e0e0; border: 1px solid #555;
-            border-radius: 4px; padding: 4px 2px; font-size: 9.5px; font-weight: bold;
-            cursor: pointer; transition: all 0.15s ease; text-align: center; white-space: nowrap;
+            position: relative;
+            background-color: #383838;
+            color: #ffffff;
+            border: 1px solid #5a5a5a;
+            border-radius: 5px;
+            padding: 6px 2px;
+            font-size: 10.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: ellipsis;
+            user-select: none;
         }
-        .btn-scenario:hover { background-color: #4a4a4a; color: #ffffff; border-color: #ffeb3b; box-shadow: 0 0 6px rgba(255, 235, 59, 0.4); }
-        .btn-scenario:active { transform: scale(0.96); }
+        .btn-scenario span.phase-label {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 2px;
+        }
+        .btn-scenario:hover {
+            background-color: #4d4d4d;
+            border-color: #ffeb3b;
+        }
+        .btn-scenario:active {
+            transform: scale(0.96);
+        }
+        .btn-scenario.active-phase {
+            border-color: #ffeb3b;
+            background-color: #4a4520;
+            color: #ffeb3b;
+            box-shadow: 0 0 6px rgba(255, 235, 59, 0.45);
+        }
+        .btn-scenario.edit-mode-item {
+            border-style: dashed;
+            border-color: #ff9800;
+            cursor: grab;
+        }
+        .btn-scenario.edit-mode-item:active {
+            cursor: grabbing;
+        }
+        .btn-scenario.dragging {
+            opacity: 0.4;
+            border-color: #00ffff;
+        }
+        .btn-scenario.drag-over {
+            border: 2px solid #00ff00;
+            transform: scale(1.04);
+        }
+
+        .phase-del-btn {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #d32f2f;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            font-size: 9px;
+            line-height: 13px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.7);
+        }
+        .phase-del-btn:hover {
+            background-color: #ff1744;
+            transform: scale(1.15);
+        }
+
+/* ⬇️ [여기서부터 새로 추가할 CSS 코드] ⬇️ */
+        /* 🎬 동영상 프리셋 전용 버튼 스타일 (세련된 블루 톤) */
+        .btn-scenario.btn-video {
+            background-color: #0b3d60;
+            border-color: #1976d2;
+            color: #e0f2fe;
+        }
+        .btn-scenario.btn-video:hover {
+            background-color: #0f568a;
+            border-color: #64b5f6;
+            color: #ffffff;
+        }
+        .btn-scenario.btn-video.active-phase {
+            border-color: #64b5f6;
+            background-color: #0d47a1;
+            color: #ffffff;
+            box-shadow: 0 0 8px rgba(33, 150, 243, 0.6);
+        }
+
+        /* 🎬 전체화면 동영상 재생 오버레이 */
+        #video-fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        }
+        #video-fullscreen-overlay video {
+            max-width: 95vw;
+            max-height: 95vh;
+            outline: none;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+            border-radius: 8px;
+        }
+        #btn-close-video {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 32px;
+            color: #ffffff;
+            cursor: pointer;
+            user-select: none;
+            z-index: 100000;
+            line-height: 1;
+            transition: transform 0.2s, color 0.2s;
+        }
+        #btn-close-video:hover {
+            color: #ff5252;
+            transform: scale(1.2);
+        }
+
+        /* 🟢 Save changes? (Yes / No) 커스텀 모달 스타일 */
+        #save-confirm-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .modal-card {
+            background: #252525;
+            border: 1px solid #666;
+            border-radius: 10px;
+            padding: 18px 22px;
+            width: 280px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .modal-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .modal-btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .modal-btn {
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .modal-btn-yes {
+            background-color: #28a745;
+            color: #ffffff;
+        }
+        .modal-btn-yes:hover { background-color: #218838; }
+        .modal-btn-no {
+            background-color: #dc3545;
+            color: #ffffff;
+        }
+        .modal-btn-no:hover { background-color: #c82333; }
 
         /* 🟢 Apply & Reset 버튼 나란히 배치 */
         .action-btn-group {
@@ -549,9 +827,51 @@
             font-weight: bold; transition: 0.2s; width: 100%;
         }
         .session-btn:hover { background: #444; color: #fff; }
+
+        /* 📱 모바일 화면 (폭 768px 이하) 전용 레이아웃 ('사진 2' 스타일) */
+        @media (max-width: 768px) {
+            #monitor-wrapper {
+                left: 1vw;
+                top: 1vh;
+                width: 98vw;
+                max-width: 98vw;
+            }
+
+            #controls {
+                left: 0;
+                right: 0;
+                top: calc(1vh + (98vw / 1.3) + 6px);
+                width: 100vw;
+                max-width: 100vw;
+                max-height: calc(99vh - (98vw / 1.3) - 6px);
+                border-radius: 12px 12px 0 0;
+            }
+
+            #qr-container {
+                bottom: 12px;
+                left: 12px;
+                width: 165px;
+                padding: 6px 10px;
+            }
+        }
     </style>
 </head>
 <body>
+<div id="video-fullscreen-overlay">
+        <span id="btn-close-video" title="닫기 (ESC)">✕</span>
+        <video id="player-fullscreen-video" playsinline></video>
+    </div>
+    <!-- 🟢 Save Changes 확인 모달 (Yes(Save) / No(Discard)) -->
+    <div id="save-confirm-modal">
+        <div class="modal-card">
+            <div class="modal-title">Save changes?</div>
+            <div class="modal-btn-row">
+                <button type="button" class="modal-btn modal-btn-yes" id="modal-btn-save">Yes (Save)</button>
+                <button type="button" class="modal-btn modal-btn-no" id="modal-btn-discard">No (Discard)</button>
+            </div>
+        </div>
+    </div>
+
     <div id="monitor-wrapper">
         <div id="monitor-handle" title="상단 베젤을 잡고 이동"></div>
         <div id="monitor-resizer" class="resizer-handle" title="크기 조절"></div>
@@ -651,6 +971,8 @@
                     <option value="10">Vol: 10%</option>
                     <option value="0">Vol: 0%</option>
                 </select>
+                <!-- ✅ 패들렛 커뮤니티 바로가기 버튼 추가 -->
+                <button type="button" class="panel-top-btn" style="background:#5c4b8b; color:#fff; border:1px solid #7c6bb0;" onclick="window.open('https://padlet.com/geonjiyong/VVSS', '_blank')" title="의견 및 프리셋 공유 패들렛 열기">💬 VVSS Community</button>
             </div>
             <button class="min-btn" id="ctrl-min-btn" title="최소화/열기">−</button>
         </div>
@@ -912,23 +1234,40 @@
                 </div>
             </div>
 
-            <!-- 🟢 [RC 시나리오 프리셋] 원클릭 프리셋 영역 -->
+<!-- 🟢 [시나리오 프리셋 관리] 영역 -->
             <div class="scenario-section">
-                <div class="scenario-header">[RC 시나리오 프리셋]</div>
-                <div class="scenario-grid">
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('1-1')">#1-1</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('1-2')">#1-2</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('2-1')">#2-1</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('2-2')">#2-2</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('3-1')">#3-1</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('3-2')">#3-2</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('4-1')">#4-1</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('4-2')">#4-2</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('5-1')">#5-1</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('5-2')">#5-2</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('6-1')">#6-1</button>
-                    <button type="button" class="btn-scenario" onclick="applyRCPreset('6-2')">#6-2</button>
+                <div class="scenario-header">[Scenario Preset Management]</div>
+                
+                <!-- 1행: 세트 드롭다운 / New set / Edit mode -->
+                <div class="preset-top-controls">
+                    <select id="preset-set-select" title="프리셋 세트 선택"></select>
+                    <button type="button" class="btn-preset-ctrl" id="btn-new-set">New set</button>
+                    <button type="button" class="btn-preset-ctrl" id="btn-edit-mode">Edit mode</button>
                 </div>
+
+                <!-- 2행: Import preset / Export preset -->
+                <div class="preset-io-row">
+                    <button type="button" class="btn-preset-import" id="btn-import-preset">Import preset</button>
+                    <button type="button" class="btn-preset-export" id="btn-export-preset">Export preset</button>
+                </div>
+
+                <div class="scenario-divider"></div>
+
+                <!-- 1단: Vital Phase 영역 -->
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; font-weight:bold; color:#ffeb3b;">Vital Sign Phases</span>
+                    <button type="button" class="btn-preset-ctrl" id="btn-add-phase" style="padding: 3px 6px;">+ Add Phase</button>
+                </div>
+                <div class="scenario-grid" id="scenario-phase-grid"></div>
+
+                <div class="scenario-divider"></div>
+
+                <!-- 2단: Video Clip 영역 -->
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; font-weight:bold; color:#64b5f6;">Video Clips</span>
+                    <button type="button" class="btn-preset-ctrl" id="btn-add-video" style="padding: 3px 6px; background-color:#0b3d60; border-color:#1976d2;">+ Add Video</button>
+                </div>
+                <div class="scenario-grid" id="scenario-video-grid"></div>
             </div>
 
         </div>
@@ -1060,6 +1399,610 @@
         let qrCodeInstance = null;
         let currentMonitorStatus = 'standby';
 
+        // ==========================================
+        // 🟢 시나리오 프리셋 관리 시스템 데이터 및 로직
+        // ==========================================
+        const DEFAULT_PRESET_DATA = {
+            currentSet: "RC 시나리오 (기본)",
+            sets: {
+	"RC 시나리오 (기본)": [
+    	{ name: "#1-1", vitals: { sys: 124, dia: 83, hr: 70, spo2: 98,  etco2: 41, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+   	 { name: "#1-2", vitals: { sys: 119, dia: 75, hr: 70, spo2: 100, etco2: 36, rr: 12, bt: 36.3, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+  	  { name: "#2-1", vitals: { sys: 75,  dia: 50, hr: 65, spo2: 100, etco2: 31, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+  	  { name: "#2-2", vitals: { sys: 102, dia: 68, hr: 75, spo2: 100, etco2: 33, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+  	  { name: "#3-1", vitals: { sys: 81,  dia: 54, hr: 75, spo2: 100, etco2: 32, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+   	 { name: "#3-2", vitals: { sys: 93,  dia: 65, hr: 78, spo2: 100, etco2: 34, rr: 11, bt: 36.1, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+   	 { name: "#4-1", vitals: { sys: 132, dia: 88, hr: 81, spo2: 98,  etco2: 43, rr: 11, bt: 36.1, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+   	 { name: "#4-2", vitals: { sys: 125, dia: 83, hr: 85, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+  	  { name: "#5-1", vitals: { sys: 117, dia: 78, hr: 81, spo2: 99,  etco2: 42, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'curare', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: true,  abpMode: false, dbpSync: true } },
+  	  { name: "#5-2", vitals: { sys: 115, dia: 77, hr: 85, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+   	 { name: "#6-1", vitals: { sys: 152, dia: 101,hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+   	 { name: "#6-2", vitals: { sys: 122, dia: 81, hr: 78, spo2: 100, etco2: 35, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } }
+	],
+	"MTP 대처 시나리오 프리셋": [
+	{ name: "시작", vitals: { sys: 105, dia: 69, hr: 71, spo2: 100, etco2: 38, rr: 12, bt: 36.1, st: 0.4, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#1", vitals: { sys: 72, dia: 38, hr: 124, spo2: 95, etco2: 28, rr: 14, bt: 35.9, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#2", vitals: { sys: 92, dia: 51, hr: 125, spo2: 96, etco2: 30, rr: 14, bt: 35.9, st: 0.6, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#3-1", vitals: { sys: 85, dia: 48, hr: 125, spo2: 97, etco2: 30, rr: 12, bt: 35.8, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#3-2", vitals: { sys: 101, dia: 62, hr: 121, spo2: 98, etco2: 32, rr: 12, bt: 35.7, st: 0.5, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#4-1", vitals: { sys: 78, dia: 42, hr: 120, spo2: 95, etco2: 26, rr: 14, bt: 35.6, st: 0.4, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#4-2", vitals: { sys: 90, dia: 51, hr: 112, spo2: 97, etco2: 29, rr: 14, bt: 35.6, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#4-3", vitals: { sys: 96, dia: 58, hr: 115, spo2: 97, etco2: 30, rr: 14, bt: 35.7, st: 1.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#5-1", vitals: { sys: 115, dia: 72, hr: 92, spo2: 99, etco2: 35, rr: 12, bt: 35.7, st: -0.1, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#5-2", vitals: { sys: 101, dia: 66, hr: 91, spo2: 100, etco2: 34, rr: 12, bt: 35.7, st: 0.2, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+	{ name: "#6", vitals: { sys: 98, dia: 65, hr: 95, spo2: 100, etco2: 34, rr: 11, bt: 35.7, st: 0.3, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } }
+	]
+            }
+        };
+
+        let presetData = JSON.parse(JSON.stringify(DEFAULT_PRESET_DATA));
+        let activePhaseIndex = null;
+        let isEditMode = false;
+        let backupBeforeEdit = null;
+        let dragSrcIndex = null;
+
+        // 🔄 구버전 JSON 배열 구조 및 신규 구조를 완벽 정규화하는 하위 호환 함수
+        function normalizePresetSet(targetSet) {
+            if (!targetSet) return { phases: [], videos: [] };
+            if (Array.isArray(targetSet)) {
+                return {
+                    phases: targetSet,
+                    videos: []
+                };
+            }
+            return {
+                phases: Array.isArray(targetSet.phases) ? targetSet.phases : [],
+                videos: Array.isArray(targetSet.videos) ? targetSet.videos : []
+            };
+        }
+
+        const presetDOM = {
+            setSelect: document.getElementById('preset-set-select'),
+            btnNewSet: document.getElementById('btn-new-set'),
+            btnAddPhase: document.getElementById('btn-add-phase'),
+            btnAddVideo: document.getElementById('btn-add-video'),
+            btnEditMode: document.getElementById('btn-edit-mode'),
+            btnImport: document.getElementById('btn-import-preset'),
+            btnExport: document.getElementById('btn-export-preset'),
+            phaseGrid: document.getElementById('scenario-phase-grid'),
+            videoGrid: document.getElementById('scenario-video-grid'),
+            saveModal: document.getElementById('save-confirm-modal'),
+            btnModalSave: document.getElementById('modal-btn-save'),
+            btnModalDiscard: document.getElementById('modal-btn-discard'),
+            videoOverlay: document.getElementById('video-fullscreen-overlay'),
+            videoPlayer: document.getElementById('player-fullscreen-video'),
+            btnCloseVideo: document.getElementById('btn-close-video')
+        };
+
+        function loadPresetsFromStorage() {
+            try {
+                const saved = localStorage.getItem('vvss_preset_data_v1');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed.sets && Object.keys(parsed.sets).length > 0) {
+                        presetData = parsed;
+
+		Object.keys(presetData.sets).forEach(sName => {
+                            presetData.sets[sName] = normalizePresetSet(presetData.sets[sName]);
+                        });
+
+                        if (!presetData.sets[presetData.currentSet]) {
+                            presetData.currentSet = Object.keys(presetData.sets)[0];
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Preset localStorage load failed:', e);
+            }
+        }
+
+        function savePresetsToStorage() {
+            try {
+                localStorage.setItem('vvss_preset_data_v1', JSON.stringify(presetData));
+            } catch (e) {
+                console.warn('Preset localStorage save failed:', e);
+            }
+        }
+
+        function extractCurrentVitals() {
+            return {
+                sys: Number(state.sys),
+                dia: Number(state.dia),
+                hr: Number(state.hr),
+                spo2: Number(state.spo2),
+                etco2: Number(state.etco2),
+                rr: Number(state.rr),
+                bt: Number(state.bt),
+                st: Number(state.st),
+                rhythm: state.rhythm || 'normal',
+                etco2Pattern: state.etco2Pattern || 'normal',
+                cleftDepth: Number(state.cleftDepth || 0.4),
+                tWaveInverted: !!state.tWaveInverted,
+                selfBreathing: !!state.selfBreathing,
+                abpMode: !!state.abpMode,
+                dbpSync: !!state.dbpSync
+            };
+        }
+
+function updateActivePhaseVitalsIfSelected() {
+            if (activePhaseIndex === null) return;
+            const currentData = normalizePresetSet(presetData.sets[presetData.currentSet]);
+            if (!currentData.phases || !currentData.phases[activePhaseIndex]) return;
+
+            currentData.phases[activePhaseIndex].vitals = extractCurrentVitals();
+            if (!isEditMode) {
+                savePresetsToStorage();
+            }
+        }
+
+        let dragSrcType = null; // 'phase' 또는 'video' 구분용
+
+        function renderPresetUI() {
+            presetDOM.setSelect.innerHTML = '';
+            Object.keys(presetData.sets).forEach(setName => {
+                const opt = document.createElement('option');
+                opt.value = setName;
+                opt.textContent = setName;
+                if (setName === presetData.currentSet) opt.selected = true;
+                presetDOM.setSelect.appendChild(opt);
+            });
+
+            if (isEditMode) {
+                presetDOM.btnEditMode.textContent = 'Save changes';
+                presetDOM.btnEditMode.classList.add('edit-active');
+            } else {
+                presetDOM.btnEditMode.textContent = 'Edit mode';
+                presetDOM.btnEditMode.classList.remove('edit-active');
+            }
+
+            if (!presetData.sets[presetData.currentSet]) {
+                presetData.sets[presetData.currentSet] = { phases: [], videos: [] };
+            }
+            presetData.sets[presetData.currentSet] = normalizePresetSet(presetData.sets[presetData.currentSet]);
+            
+            const currentData = presetData.sets[presetData.currentSet];
+            const phases = currentData.phases;
+            const videos = currentData.videos;
+
+            // 1️⃣ Vital Phase 그리드
+            presetDOM.phaseGrid.innerHTML = '';
+            phases.forEach((phaseObj, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-scenario';
+                if (idx === activePhaseIndex) btn.classList.add('active-phase');
+                if (isEditMode) btn.classList.add('edit-mode-item');
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'phase-label';
+                labelSpan.textContent = phaseObj.name;
+                btn.appendChild(labelSpan);
+
+                btn.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('phase-del-btn')) return;
+                    applyPhasePreset(idx);
+                });
+
+                if (isEditMode) {
+                    btn.title = '더블클릭: 이름 수정 / 드래그: 순서 변경';
+
+                    btn.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        const newName = prompt('Please enter the new phase name', phaseObj.name);
+                        if (newName !== null && newName.trim() !== '') {
+                            phases[idx].name = newName.trim();
+                            renderPresetUI();
+                        }
+                    });
+
+                    const delBtn = document.createElement('span');
+                    delBtn.className = 'phase-del-btn';
+                    delBtn.textContent = '✕';
+                    delBtn.title = 'Delete this phase';
+                    delBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete this phase?')) {
+                            phases.splice(idx, 1);
+                            if (activePhaseIndex === idx) activePhaseIndex = null;
+                            else if (activePhaseIndex !== null && activePhaseIndex > idx) activePhaseIndex--;
+                            renderPresetUI();
+                        }
+                    });
+                    btn.appendChild(delBtn);
+
+                    btn.draggable = true;
+                    btn.addEventListener('dragstart', (e) => {
+                        dragSrcIndex = idx;
+                        dragSrcType = 'phase';
+                        btn.classList.add('dragging');
+                        if (e.dataTransfer) {
+                            e.dataTransfer.effectAllowed = 'move';
+                            e.dataTransfer.setData('text/plain', String(idx));
+                        }
+                    });
+                    btn.addEventListener('dragend', () => {
+                        btn.classList.remove('dragging');
+                        presetDOM.phaseGrid.querySelectorAll('.btn-scenario').forEach(el => el.classList.remove('drag-over'));
+                    });
+                    btn.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        if (dragSrcType === 'phase') {
+                            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                            btn.classList.add('drag-over');
+                        }
+                    });
+                    btn.addEventListener('dragleave', () => btn.classList.remove('drag-over'));
+                    btn.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        btn.classList.remove('drag-over');
+                        if (dragSrcType !== 'phase' || dragSrcIndex === null || dragSrcIndex === idx) return;
+
+                        const moved = phases.splice(dragSrcIndex, 1)[0];
+                        phases.splice(idx, 0, moved);
+
+                        if (activePhaseIndex === dragSrcIndex) activePhaseIndex = idx;
+                        else if (activePhaseIndex !== null) {
+                            if (dragSrcIndex < activePhaseIndex && idx >= activePhaseIndex) activePhaseIndex--;
+                            else if (dragSrcIndex > activePhaseIndex && idx <= activePhaseIndex) activePhaseIndex++;
+                        }
+                        dragSrcIndex = null;
+                        renderPresetUI();
+                    });
+                }
+                presetDOM.phaseGrid.appendChild(btn);
+            });
+
+            // 2️⃣ Video Clips 그리드
+            presetDOM.videoGrid.innerHTML = '';
+            videos.forEach((videoObj, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-scenario btn-video';
+                if (isEditMode) btn.classList.add('edit-mode-item');
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'phase-label';
+                labelSpan.textContent = `▶ ${videoObj.name}`;
+                btn.appendChild(labelSpan);
+
+                btn.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('phase-del-btn')) return;
+                    triggerPlayVideo(videoObj.url);
+                });
+
+                if (isEditMode) {
+                    btn.title = '더블클릭: 이름/URL 수정 / 드래그: 순서 변경';
+
+                    btn.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        const newName = prompt('비디오 이름을 입력하세요:', videoObj.name);
+                        if (newName === null) return;
+                        const newUrl = prompt('비디오 파일 URL(경로)을 입력하세요:', videoObj.url);
+                        if (newUrl === null) return;
+                        
+                        videoObj.name = newName.trim() || videoObj.name;
+                        videoObj.url = newUrl.trim() || videoObj.url;
+                        renderPresetUI();
+                    });
+
+                    const delBtn = document.createElement('span');
+                    delBtn.className = 'phase-del-btn';
+                    delBtn.textContent = '✕';
+                    delBtn.title = 'Delete this video';
+                    delBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete this video preset?')) {
+                            videos.splice(idx, 1);
+                            renderPresetUI();
+                        }
+                    });
+                    btn.appendChild(delBtn);
+
+                    btn.draggable = true;
+                    btn.addEventListener('dragstart', (e) => {
+                        dragSrcIndex = idx;
+                        dragSrcType = 'video';
+                        btn.classList.add('dragging');
+                        if (e.dataTransfer) {
+                            e.dataTransfer.effectAllowed = 'move';
+                            e.dataTransfer.setData('text/plain', String(idx));
+                        }
+                    });
+                    btn.addEventListener('dragend', () => {
+                        btn.classList.remove('dragging');
+                        presetDOM.videoGrid.querySelectorAll('.btn-scenario').forEach(el => el.classList.remove('drag-over'));
+                    });
+                    btn.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        if (dragSrcType === 'video') {
+                            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                            btn.classList.add('drag-over');
+                        }
+                    });
+                    btn.addEventListener('dragleave', () => btn.classList.remove('drag-over'));
+                    btn.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        btn.classList.remove('drag-over');
+                        if (dragSrcType !== 'video' || dragSrcIndex === null || dragSrcIndex === idx) return;
+
+                        const moved = videos.splice(dragSrcIndex, 1)[0];
+                        videos.splice(idx, 0, moved);
+                        dragSrcIndex = null;
+                        renderPresetUI();
+                    });
+                }
+                presetDOM.videoGrid.appendChild(btn);
+            });
+        }
+
+        function applyPhasePreset(idx) {
+	const currentData = normalizePresetSet(presetData.sets[presetData.currentSet]);
+            const phases = currentData.phases;
+            if (!phases || !phases[idx]) return;
+
+            activePhaseIndex = idx;
+            const selectedVitals = JSON.parse(JSON.stringify(phases[idx].vitals));
+
+            Object.assign(state, selectedVitals);
+            if (state.dbpSync && selectedVitals.dia === undefined) {
+                applySysChange(state.sys);
+            }
+
+            DOM.ctrlSelfBreathing.checked = !!state.selfBreathing;
+            DOM.ctrlDbpSync.checked = !!state.dbpSync;
+            DOM.ctrlTWave.checked = !!state.tWaveInverted;
+            DOM.ctrlRhythm.value = state.rhythm || 'normal';
+            DOM.ctrlEtco2Pattern.value = state.etco2Pattern || 'normal';
+            toggleABPMode(!!state.abpMode);
+
+            updateDisplay();
+            renderPresetUI();
+            syncToFirebase(state);
+            checkAutoAlarms();
+        }
+
+        presetDOM.setSelect.addEventListener('change', (e) => {
+            presetData.currentSet = e.target.value;
+            activePhaseIndex = null;
+            if (!isEditMode) savePresetsToStorage();
+            renderPresetUI();
+        });
+
+        presetDOM.btnNewSet.addEventListener('click', () => {
+            const setName = prompt('Please enter the set name');
+            if (setName === null) return;
+            const trimmed = setName.trim();
+            if (!trimmed) return;
+
+            if (presetData.sets[trimmed]) {
+                alert('A set with this name already exists.');
+                return;
+            }
+
+            presetData.sets[trimmed] = [];
+            presetData.currentSet = trimmed;
+            activePhaseIndex = null;
+            if (!isEditMode) savePresetsToStorage();
+            renderPresetUI();
+        });
+
+        presetDOM.btnAddPhase.addEventListener('click', () => {
+            const phaseName = prompt('Please enter the phase name');
+            if (phaseName === null) return;
+            const trimmed = phaseName.trim();
+            if (!trimmed) return;
+
+            state.bt = parseFloat(DOM.inBT.value) || state.bt;
+            state.hr = parseInt(DOM.inHR.value) || state.hr;
+            state.st = parseFloat(DOM.inST.value) || 0.0;
+            state.spo2 = parseInt(DOM.inSpO2.value) || state.spo2;
+            state.etco2 = parseInt(DOM.inEtCO2.value) || state.etco2;
+            state.rr = parseInt(DOM.inRR.value) || state.rr;
+            state.sys = parseInt(DOM.inSys.value) || state.sys;
+            state.dia = parseInt(DOM.inDia.value) || state.dia;
+
+            if (!presetData.sets[presetData.currentSet]) {
+                presetData.sets[presetData.currentSet] = [];
+            }
+
+            presetData.sets[presetData.currentSet].push({
+                name: trimmed,
+                vitals: extractCurrentVitals()
+            });
+
+            activePhaseIndex = presetData.sets[presetData.currentSet].phases.length - 1;
+            if (!isEditMode) savePresetsToStorage();
+            renderPresetUI();
+        });
+
+	// ⬇️ [여기서부터 새로 추가할 + Add Video 이벤트] ⬇️
+        presetDOM.btnAddVideo.addEventListener('click', async () => {
+            const currentData = normalizePresetSet(presetData.sets[presetData.currentSet]);
+            presetData.sets[presetData.currentSet] = currentData;
+
+            let videoUrl = '';
+            let defaultName = 'Video ' + (currentData.videos.length + 1);
+
+            if (window.showOpenFilePicker) {
+                try {
+                    const [fileHandle] = await window.showOpenFilePicker({
+                        startIn: 'documents',
+                        multiple: false,
+                        types: [{
+                            description: 'Video Files',
+                            accept: { 'video/*': ['.mp4', '.webm', '.ogg', '.mov'] }
+                        }]
+                    });
+                    const file = await fileHandle.getFile();
+                    defaultName = file.name.replace(/\.[^/.]+$/, "");
+                    videoUrl = URL.createObjectURL(file);
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                    console.warn('FilePicker fallback:', err);
+                }
+            }
+
+            if (!videoUrl) {
+                const inputUrl = prompt('동영상 파일 URL 또는 상대경로를 입력하세요 (예: video.mp4):');
+                if (!inputUrl) return;
+                videoUrl = inputUrl.trim();
+            }
+
+            const title = prompt('프리셋에 표시할 동영상 이름을 입력하세요:', defaultName);
+            if (title === null) return;
+
+            currentData.videos.push({
+                name: title.trim() || defaultName,
+                url: videoUrl
+            });
+
+            if (!isEditMode) savePresetsToStorage();
+            renderPresetUI();
+        });
+
+        presetDOM.btnEditMode.addEventListener('click', () => {
+            if (!isEditMode) {
+                backupBeforeEdit = JSON.parse(JSON.stringify(presetData));
+                isEditMode = true;
+                renderPresetUI();
+            } else {
+                presetDOM.saveModal.style.display = 'flex';
+            }
+        });
+
+        presetDOM.btnModalSave.addEventListener('click', () => {
+            presetDOM.saveModal.style.display = 'none';
+            isEditMode = false;
+            backupBeforeEdit = null;
+            savePresetsToStorage();
+            renderPresetUI();
+        });
+
+        presetDOM.btnModalDiscard.addEventListener('click', () => {
+            presetDOM.saveModal.style.display = 'none';
+            if (backupBeforeEdit) {
+                presetData = JSON.parse(JSON.stringify(backupBeforeEdit));
+            }
+            isEditMode = false;
+            backupBeforeEdit = null;
+            activePhaseIndex = null;
+            renderPresetUI();
+        });
+
+        presetDOM.btnExport.addEventListener('click', async () => {
+            const exportJsonStr = JSON.stringify(presetData, null, 2);
+
+            if (window.showSaveFilePicker) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: `${presetData.currentSet || 'preset'}.json`,
+                        startIn: 'documents',
+                        types: [{
+                            description: 'JSON Preset File',
+                            accept: { 'application/json': ['.json'] }
+                        }]
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(exportJsonStr);
+                    await writable.close();
+
+                    const baseName = handle.name.replace(/\.json$/i, '');
+                    alert(`Saved with the filename '${baseName}'`);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error('Export failed:', err);
+                        alert('Failed to export preset file.');
+                    }
+                }
+            } else {
+                const fileNameInput = prompt('Please enter a file name', presetData.currentSet || 'preset');
+                if (!fileNameInput) return;
+                const cleanName = fileNameInput.trim().replace(/\.json$/i, '');
+                const blob = new Blob([exportJsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${cleanName}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert(`Saved with the filename '${cleanName}'`);
+            }
+        });
+
+        function applyImportedPresetObject(importedObj, fileName) {
+            if (!importedObj || typeof importedObj !== 'object' || !importedObj.sets) {
+                alert('Invalid preset JSON file format.');
+                return;
+            }
+            presetData = importedObj;
+            
+	// ⬇️ [추가: 불러온 모든 세트 정규화] ⬇️
+            Object.keys(presetData.sets).forEach(sName => {
+                presetData.sets[sName] = normalizePresetSet(presetData.sets[sName]);
+            });
+
+	const setNames = Object.keys(presetData.sets);
+            if (setNames.length === 0) {
+                presetData = JSON.parse(JSON.stringify(DEFAULT_PRESET_DATA));
+            } else if (!presetData.currentSet || !presetData.sets[presetData.currentSet]) {
+                presetData.currentSet = setNames[0];
+            }
+            isEditMode = false;
+            backupBeforeEdit = null;
+            activePhaseIndex = null;
+            savePresetsToStorage();
+            renderPresetUI();
+
+            if (fileName) {
+                alert(`Successfully imported '${fileName}'`);
+            }
+        }
+
+        presetDOM.btnImport.addEventListener('click', async () => {
+            if (window.showOpenFilePicker) {
+                try {
+                    const [fileHandle] = await window.showOpenFilePicker({
+                        startIn: 'documents',
+                        multiple: false,
+                        types: [{
+                            description: 'JSON Preset File',
+                            accept: { 'application/json': ['.json'] }
+                        }]
+                    });
+                    const file = await fileHandle.getFile();
+                    const text = await file.text();
+                    const parsed = JSON.parse(text);
+                    applyImportedPresetObject(parsed, file.name);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error('Import failed:', err);
+                        alert('Failed to load the preset file.');
+                    }
+                }
+            } else {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json,application/json';
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    try {
+                        const text = await file.text();
+                        const parsed = JSON.parse(text);
+                        applyImportedPresetObject(parsed, file.name);
+                    } catch (err) {
+                        alert('Failed to load the preset file.');
+                    }
+                };
+                input.click();
+            }
+        });
+
+        loadPresetsFromStorage();
+        renderPresetUI();
+
         // 🟢 연결 상태 감지
         const connectionStatusEl = document.getElementById('connection-status');
         firebase.database().ref('.info/connected').on('value', (snap) => {
@@ -1138,12 +2081,10 @@
                 renderQRCode();
             }
 
-            // 🟢 Firebase 알람 이벤트 수신 (원격 컨트롤러 트리거 지원)
             currentSessionRef.child('alarmTrigger').on('value', (snap) => {
                 const triggerData = snap.val();
                 if (!triggerData || !triggerData.target) return;
                 
-                // 3초 이내에 전송된 알람만 처리하여 재접속 시 이전 알람 중복 실행 방지
                 if (Date.now() - triggerData.timestamp < 3000) {
                     const targetBoxes = {
                         nbp: DOM.boxValNBP,
@@ -1155,6 +2096,22 @@
                     };
                     const targetEl = targetBoxes[triggerData.target];
                     if (targetEl) triggerManualAlarm(targetEl);
+                }
+            });
+
+	// ⬇️ [여기서부터 새로 추가할 Firebase 수신 코드] ⬇️
+            currentSessionRef.child('videoEvent').on('value', (snap) => {
+                const event = snap.val();
+                if (!event) return;
+                if (Date.now() - event.timestamp < 10000) {
+                    if (event.action === 'play' && event.url) {
+                        playVideoFullscreen(event.url);
+                    } else if (event.action === 'stop') {
+                        if (presetDOM.videoOverlay.style.display === 'flex') {
+                            presetDOM.videoPlayer.pause();
+                            presetDOM.videoOverlay.style.display = 'none';
+                        }
+                    }
                 }
             });
 
@@ -1329,7 +2286,6 @@
             if (currentSessionRef) currentSessionRef.update(updates);
         }
 
-        // 🟢 원격/로컬 공용 알람 트리거 함수
         function triggerManualAlarmRemote(targetKey) {
             const targetBoxes = {
                 nbp: DOM.boxValNBP,
@@ -1350,7 +2306,6 @@
             }
         }
 
-        // 🟢 컨트롤러 라벨(수치 제목) 클릭 시 알람 트리거 리스너 등록
         document.querySelectorAll('.ctrl-title-btn').forEach(label => {
             label.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1459,6 +2414,7 @@
             }
 
             updateDisplay();
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase(state);
             checkAutoAlarms();
         });
@@ -1472,6 +2428,9 @@
             state.monitorStatus = currentStatus;
             state.volume = currentVol;
             state.isMuted = currentMuted;
+
+            activePhaseIndex = null;
+            renderPresetUI();
 
             DOM.ctrlSelfBreathing.checked = state.selfBreathing;
             DOM.ctrlDbpSync.checked = state.dbpSync;
@@ -1488,6 +2447,7 @@
             state.hr = Math.max(20, Math.min(300, parseInt(state.hr) + 2));
             state.etco2 = Math.max(1, Math.min(100, parseInt(state.etco2) - 1));
             updateDisplay();
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({ sys: state.sys, dia: state.dia, hr: state.hr, etco2: state.etco2 });
             checkAutoAlarms();
         });
@@ -1497,43 +2457,10 @@
             state.hr = Math.max(20, Math.min(300, parseInt(state.hr) - 2));
             state.etco2 = Math.max(1, Math.min(100, parseInt(state.etco2) + 1));
             updateDisplay();
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({ sys: state.sys, dia: state.dia, hr: state.hr, etco2: state.etco2 });
             checkAutoAlarms();
         });
-
-        function applyRCPreset(presetKey) {
-            const presets = {
-                '1-1': { sys: 124, hr: 60, spo2: 98,  etco2: 42, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '1-2': { sys: 124, hr: 60, spo2: 100, etco2: 35, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '2-1': { sys: 75,  hr: 62, spo2: 100, etco2: 31, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '2-2': { sys: 102, hr: 75, spo2: 100, etco2: 33, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '3-1': { sys: 81,  hr: 75, spo2: 100, etco2: 32, rr: 10, bt: 36.2, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '3-2': { sys: 93,  hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '4-1': { sys: 132, hr: 81, spo2: 98,  etco2: 41, rr: 10, bt: 36.1, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '4-2': { sys: 125, hr: 82, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '5-1': { sys: 117, dia: 78, hr: 81, spo2: 99,  etco2: 39, etco2Pattern: 'curare', rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: true, abpMode: false, dbpSync: true },
-                '5-2': { sys: 115, dia: 77, hr: 85, spo2: 100, etco2: 36, etco2Pattern: 'normal', rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '6-1': { sys: 152, hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true },
-                '6-2': { sys: 93,  hr: 78, spo2: 100, etco2: 34, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true }
-            };
-
-            const selected = presets[String(presetKey)];
-            if (selected) {
-                Object.assign(state, selected);
-                
-                if (state.dbpSync) {
-                    applySysChange(state.sys);
-                }
-
-                DOM.ctrlSelfBreathing.checked = state.selfBreathing;
-                DOM.ctrlDbpSync.checked = state.dbpSync;
-                DOM.ctrlTWave.checked = state.tWaveInverted;
-                toggleABPMode(state.abpMode);
-                updateDisplay();
-                syncToFirebase(state);
-                checkAutoAlarms();
-            }
-        }
 
         document.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener('keypress', function(e) {
@@ -1583,6 +2510,7 @@
         DOM.ctrlCleftDepth.oninput = (e) => { 
             state.cleftDepth = parseFloat(e.target.value); 
             DOM.inCleftDepth.value = state.cleftDepth; 
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({cleftDepth: state.cleftDepth}); 
         };
 
@@ -1594,10 +2522,12 @@
                 DOM.inDia.value = autoDia;
                 DOM.ctrlDia.value = autoDia;
             }
+            updateActivePhaseVitalsIfSelected();
         });
 
         DOM.ctrlTWave.addEventListener('change', (e) => { 
             state.tWaveInverted = e.target.checked; 
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({tWaveInverted: state.tWaveInverted}); 
             checkAutoAlarms();
         });
@@ -1605,6 +2535,7 @@
         DOM.btnToggleST.addEventListener('click', () => {
             state.tWaveInverted = !state.tWaveInverted;
             DOM.ctrlTWave.checked = state.tWaveInverted;
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({tWaveInverted: state.tWaveInverted});
             checkAutoAlarms();
         });
@@ -1626,21 +2557,25 @@
 
         DOM.ctrlABP.addEventListener('change', (e) => {
             toggleABPMode(e.target.checked);
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({abpMode: state.abpMode});
         });
 
         DOM.ctrlSelfBreathing.addEventListener('change', (e) => {
             state.selfBreathing = e.target.checked;
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({ selfBreathing: state.selfBreathing });
         });
         
         DOM.labelNBPTitle.addEventListener('click', () => {
             toggleABPMode(!state.abpMode);
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({abpMode: state.abpMode});
         });
 
         DOM.ctrlRhythm.addEventListener('change', (e) => {
             state.rhythm = e.target.value;
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({rhythm: state.rhythm});
             checkAutoAlarms();
         });
@@ -1653,6 +2588,7 @@
             if (nextIndex >= DOM.ctrlRhythm.options.length) nextIndex = DOM.ctrlRhythm.options.length - 1;
             DOM.ctrlRhythm.selectedIndex = nextIndex;
             state.rhythm = DOM.ctrlRhythm.value;
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({ rhythm: state.rhythm });
             checkAutoAlarms();
         }, { passive: false });
@@ -1660,6 +2596,7 @@
         DOM.ctrlEtco2Pattern.addEventListener('change', (e) => {
             state.etco2Pattern = e.target.value;
             updateDisplay();
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({ etco2Pattern: state.etco2Pattern });
         });
 
@@ -1672,6 +2609,7 @@
             DOM.ctrlEtco2Pattern.selectedIndex = nextIndex;
             state.etco2Pattern = DOM.ctrlEtco2Pattern.value;
             updateDisplay();
+            updateActivePhaseVitalsIfSelected();
             syncToFirebase({ etco2Pattern: state.etco2Pattern });
         }, { passive: false });
 
@@ -1723,6 +2661,7 @@
                     if (stateKey === 'sys') {
                         applySysChange(newValue);
                         updateDisplay();
+                        updateActivePhaseVitalsIfSelected();
                         syncToFirebase({ sys: state.sys, dia: state.dia });
                     } else if (stateKey === 'dia') {
                         state.dia = newValue;
@@ -1732,10 +2671,12 @@
                             syncToFirebase({dbpSync: false});
                         }
                         updateDisplay();
+                        updateActivePhaseVitalsIfSelected();
                         syncToFirebase({ dia: state.dia });
                     } else {
                         state[stateKey] = newValue;
                         updateDisplay();
+                        updateActivePhaseVitalsIfSelected();
                         syncToFirebase({ [stateKey]: newValue });
                     }
                     checkAutoAlarms();
@@ -1805,9 +2746,8 @@
 
         function triggerManualAlarm(boxElement) {
             if (!boxElement) return;
-            // 이미 애니메이션 중이면 클래스를 리셋해 다시 3회 깜빡이게 처리
             boxElement.classList.remove('alarm-active');
-            void boxElement.offsetWidth; // Reflow 트리거
+            void boxElement.offsetWidth;
             boxElement.classList.add('alarm-active');
             
             if (audioCtx && audioCtx.state === 'running' && !state.isMuted && (state.volume || 0) > 0) {
@@ -1978,7 +2918,6 @@
         let scanX = 0; const scanSpeed = 2.5; let lastYs = { ecg: 0, spo2: 0, etco2: 0, rr: 0 };
         let lastEtco2Cycle = -1;
 
-        // Capnography Mathematical Models
         class CapnographyRenderer {
             static calculate(phase, pattern, cleftDepth, timeSec) {
                 let v = 0;
@@ -2382,6 +3321,62 @@
                 qrMinBtn.innerText = '+';
             }
         });
+
+        // 📱 모바일로 접속 시(컨트롤러 전용 모드가 아닐 때) QR 코드 창을 기본 최소화 상태로 시작 ('사진 2' 구현)
+        if (window.innerWidth <= 768 && role !== 'controller') {
+            qrBody.style.display = 'none';
+            qrResizer.style.display = 'none';
+            qrContainer.style.height = 'auto';
+            qrMinBtn.innerText = '+';
+        }
+
+// ⬇️ [여기서부터 파일 맨 끝에 새로 추가] ⬇️
+        function triggerPlayVideo(url) {
+            if (!url) return;
+            if (currentSessionRef) {
+                currentSessionRef.child('videoEvent').set({
+                    action: 'play',
+                    url: url,
+                    timestamp: Date.now()
+                });
+            } else {
+                playVideoFullscreen(url);
+            }
+        }
+
+        function playVideoFullscreen(url) {
+            if (role === 'controller') return; // 모바일 컨트롤러에서는 화면을 띄우지 않고 모니터에만 표출
+            presetDOM.videoPlayer.src = url;
+            presetDOM.videoOverlay.style.display = 'flex';
+            presetDOM.videoPlayer.play().catch(err => {
+                console.warn('동영상 자동재생 실패:', err);
+            });
+        }
+
+        function closeVideoFullscreen() {
+            presetDOM.videoPlayer.pause();
+            presetDOM.videoPlayer.removeAttribute('src');
+            presetDOM.videoPlayer.load();
+            presetDOM.videoOverlay.style.display = 'none';
+
+            if (currentSessionRef) {
+                currentSessionRef.child('videoEvent').set({
+                    action: 'stop',
+                    timestamp: Date.now()
+                });
+            }
+        }
+
+        presetDOM.videoPlayer.addEventListener('ended', closeVideoFullscreen);
+        presetDOM.btnCloseVideo.addEventListener('click', closeVideoFullscreen);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                if (presetDOM.videoOverlay.style.display === 'flex') {
+                    closeVideoFullscreen();
+                }
+            }
+        });
+
     </script>
 </body>
 </html>
