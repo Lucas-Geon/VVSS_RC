@@ -459,12 +459,13 @@
             width: 100%;
             box-sizing: border-box;
         }
-        .slider-row input[type="range"] {
+.slider-row input[type="range"] {
             flex: 1;
             min-width: 0;
-            margin: 0;
+            margin: 0 4px;
             cursor: pointer;
-            height: 18px;
+            height: 14px;
+            touch-action: pan-y; /* 세로 스와이프는 무조건 부모 패널 스크롤로 넘김 */
         }
         /* '-' / '+' 버튼 1.5배 확대 (18px -> 27px) */
         .step-btn {
@@ -3796,7 +3797,7 @@ function closeVideoFullscreen(e) {
           });
       }
 
-      // 키보드 ESC 닫기
+     // 키보드 ESC 닫기
       window.addEventListener('keydown', (e) => {
           if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
               const overlay = document.getElementById('video-fullscreen-overlay');
@@ -3805,6 +3806,52 @@ function closeVideoFullscreen(e) {
               }
           }
       }, true);
+
+      // 🛡️ 모바일 세로 스크롤 시 슬라이더 오작동 방지 가드
+      document.querySelectorAll('.slider-row input[type="range"]').forEach(slider => {
+          let startX = 0, startY = 0;
+          let initialVal = slider.value;
+          let isHorizontalDrag = false;
+          let isVerticalScroll = false;
+
+          slider.addEventListener('touchstart', (e) => {
+              if (e.touches.length !== 1) return;
+              startX = e.touches[0].clientX;
+              startY = e.touches[0].clientY;
+              initialVal = slider.value; // 터치 시작 시점의 원래 값 백업
+              isHorizontalDrag = false;
+              isVerticalScroll = false;
+          }, { passive: true });
+
+          slider.addEventListener('touchmove', (e) => {
+              if (e.touches.length !== 1) return;
+              const dx = Math.abs(e.touches[0].clientX - startX);
+              const dy = Math.abs(e.touches[0].clientY - startY);
+
+              if (!isHorizontalDrag && !isVerticalScroll) {
+                  if (dy > dx && dy > 6) {
+                      // 세로 움직임이 크면 스크롤로 판정 -> 값 원상복구
+                      isVerticalScroll = true;
+                      slider.value = initialVal;
+                      slider.dispatchEvent(new Event('input'));
+                  } else if (dx > dy && dx > 6) {
+                      // 가로 움직임이 크면 슬라이더 조작으로 판정
+                      isHorizontalDrag = true;
+                  }
+              }
+
+              if (isVerticalScroll) {
+                  slider.value = initialVal;
+              }
+          }, { passive: true });
+
+          slider.addEventListener('touchend', () => {
+              if (isVerticalScroll) {
+                  slider.value = initialVal;
+                  slider.dispatchEvent(new Event('input'));
+              }
+          });
+      });
 
     </script>
 </body>
