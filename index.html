@@ -386,30 +386,44 @@
 
         .control-group {
             display: flex;
-            flex-direction: column;
+            flex-direction: row; /* 좌측 Alarm 버튼과 우측 조작 영역을 가로로 배치 */
+            align-items: stretch;
             width: 100%;
-            gap: 3px;
+            gap: 6px;
             min-width: 0;
             background: rgba(255, 255, 255, 0.03);
             padding: 5px 6px;
             border-radius: 6px;
             box-sizing: border-box;
         }
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; gap: 4px; }
+        .control-right-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 3px;
+            min-width: 0;
+        }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; gap: 4px; }
         .input-row label { font-size: 11px; margin: 0; font-weight: 600; white-space: nowrap; }
 
-        /* 🟡 노란색 Alarm 버튼 스타일 */
+        /* 🟡 노란색 정사각형 Alarm 버튼 스타일 */
         .btn-vital-alarm {
             background-color: #ffc107;
             color: #000000;
             border: 1px solid #ffdb4d;
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-size: 10px;
-            font-weight: bold;
+            border-bottom: 3px solid #c79100;
+            border-radius: 6px;
+            width: 46px;
+            padding: 0;
+            font-size: 11px;
+            font-weight: 800;
             cursor: pointer;
             flex-shrink: 0;
-            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.1s;
         }
         .btn-vital-alarm:hover { background-color: #ffca2c; }
         .btn-vital-alarm:active { transform: scale(0.93); background-color: #e0a800; }
@@ -1131,150 +1145,150 @@
                     <button type="button" class="min-btn" id="btn-min-vitals" title="Vital sign 접기/열기" style="width: 18px; height: 18px; font-size: 11px;">−</button>
                 </div>
                 <div id="vital-sign-body" style="display: flex; flex-direction: column; gap: 5px;">
-            <div class="controls-layout">
+          <div class="controls-layout">
                 <!-- 1. SBP (우측: SBP sync, ABP) -->
                 <div class="control-group" style="color:#ff0000;">
-                    <div class="input-row">
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button type="button" class="btn-vital-alarm" data-alarm-target="nbp">Alarm</button>
+                    <button type="button" class="btn-vital-alarm" data-alarm-target="nbp">Alarm</button>
+                    <div class="control-right-wrap">
+                        <div class="input-row">
                             <label>SBP (Sys):</label>
+                            <div class="inline-chk-group">
+                                <label class="inline-chk-label" style="color:#ffaaaa;">
+                                    <input type="checkbox" id="ctrl-dbp-sync" checked> SBP sync
+                                </label>
+                                <label class="inline-chk-label" style="color:#ff4d4d;">
+                                    <input type="checkbox" id="ctrl-abp" tabindex="10"> ABP
+                                </label>
+                            </div>
+                            <input type="number" id="input-sys" min="10" max="300" value="121" tabindex="1">
                         </div>
-                        <div class="inline-chk-group">
-                            <label class="inline-chk-label" style="color:#ffaaaa;">
-                                <input type="checkbox" id="ctrl-dbp-sync" checked> SBP sync
-                            </label>
-                            <label class="inline-chk-label" style="color:#ff4d4d;">
-                                <input type="checkbox" id="ctrl-abp" tabindex="10"> ABP
-                            </label>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-sys" data-step="5">−</button>
+                            <input type="range" id="ctrl-sys" min="10" max="300" value="121" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-sys" data-step="5">+</button>
                         </div>
-                        <input type="number" id="input-sys" min="10" max="300" value="121" tabindex="1">
-                    </div>
-                    <div class="slider-row">
-                        <button class="step-btn minus" data-target="ctrl-sys" data-step="5">−</button>
-                        <input type="range" id="ctrl-sys" min="10" max="300" value="121" tabindex="-1">
-                        <button class="step-btn plus" data-target="ctrl-sys" data-step="5">+</button>
                     </div>
                 </div>
                 
                 <!-- 2. DBP -->
                 <div class="control-group" style="color:#ff0000;">
-                    <div class="input-row">
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button type="button" class="btn-vital-alarm" data-alarm-target="nbp">Alarm</button>
+                    <button type="button" class="btn-vital-alarm" data-alarm-target="nbp">Alarm</button>
+                    <div class="control-right-wrap">
+                        <div class="input-row">
                             <label>DBP (Dia):</label>
+                            <input type="number" id="input-dia" min="20" max="180" value="79" tabindex="2">
                         </div>
-                        <input type="number" id="input-dia" min="20" max="180" value="79" tabindex="2">
-                    </div>
-                    <div class="slider-row">
-                        <button class="step-btn minus" data-target="ctrl-dia" data-step="5">−</button>
-                        <input type="range" id="ctrl-dia" min="20" max="180" value="79" tabindex="-1">
-                        <button class="step-btn plus" data-target="ctrl-dia" data-step="5">+</button>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-dia" data-step="5">−</button>
+                            <input type="range" id="ctrl-dia" min="20" max="180" value="79" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-dia" data-step="5">+</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 3. Heart Rate (HR) -->
                 <div class="control-group ecg-color">
-                    <div class="input-row">
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button type="button" class="btn-vital-alarm" data-alarm-target="hr">Alarm</button>
+                    <button type="button" class="btn-vital-alarm" data-alarm-target="hr">Alarm</button>
+                    <div class="control-right-wrap">
+                        <div class="input-row">
                             <label>Heart Rate (HR):</label>
+                            <input type="number" id="input-hr" min="20" max="300" value="61" tabindex="3">
                         </div>
-                        <input type="number" id="input-hr" min="20" max="300" value="61" tabindex="3">
-                    </div>
-                    <div class="slider-row">
-                        <button class="step-btn minus" data-target="ctrl-hr" data-step="3">−</button>
-                        <input type="range" id="ctrl-hr" min="20" max="300" value="61" tabindex="-1">
-                        <button class="step-btn plus" data-target="ctrl-hr" data-step="3">+</button>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-hr" data-step="3">−</button>
+                            <input type="range" id="ctrl-hr" min="20" max="300" value="61" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-hr" data-step="3">+</button>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- 4. ST Level (우측: T-Wave Inversion) -->
                 <div class="control-group ecg-color">
-                    <div class="input-row">
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button type="button" class="btn-vital-alarm" data-alarm-target="hr">Alarm</button>
+                    <button type="button" class="btn-vital-alarm" data-alarm-target="hr">Alarm</button>
+                    <div class="control-right-wrap">
+                        <div class="input-row">
                             <label>ST Level:</label>
+                            <div class="inline-chk-group">
+                                <label class="inline-chk-label ecg-color">
+                                    <input type="checkbox" id="ctrl-twave" tabindex="9"> T-Wave Inv
+                                </label>
+                            </div>
+                            <input type="number" id="input-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="4">
                         </div>
-                        <div class="inline-chk-group">
-                            <label class="inline-chk-label ecg-color">
-                                <input type="checkbox" id="ctrl-twave" tabindex="9"> T-Wave Inv
-                            </label>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-st" data-step="0.5">−</button>
+                            <input type="range" id="ctrl-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-st" data-step="0.5">+</button>
                         </div>
-                        <input type="number" id="input-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="4">
-                    </div>
-                    <div class="slider-row">
-                        <button class="step-btn minus" data-target="ctrl-st" data-step="0.5">−</button>
-                        <input type="range" id="ctrl-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="-1">
-                        <button class="step-btn plus" data-target="ctrl-st" data-step="0.5">+</button>
                     </div>
                 </div>
 
                 <!-- 5. SpO2 (%) -->
                 <div class="control-group spo2-color">
-                    <div class="input-row">
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button type="button" class="btn-vital-alarm" data-alarm-target="spo2">Alarm</button>
+                    <button type="button" class="btn-vital-alarm" data-alarm-target="spo2">Alarm</button>
+                    <div class="control-right-wrap">
+                        <div class="input-row">
                             <label>SpO2 (%):</label>
+                            <input type="number" id="input-spo2" min="20" max="100" value="100" tabindex="5">
                         </div>
-                        <input type="number" id="input-spo2" min="20" max="100" value="100" tabindex="5">
-                    </div>
-                    <div class="slider-row">
-                        <button class="step-btn minus" data-target="ctrl-spo2" data-step="1">−</button>
-                        <input type="range" id="ctrl-spo2" min="20" max="100" value="100" tabindex="-1">
-                        <button class="step-btn plus" data-target="ctrl-spo2" data-step="1">+</button>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-spo2" data-step="1">−</button>
+                            <input type="range" id="ctrl-spo2" min="20" max="100" value="100" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-spo2" data-step="1">+</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 6. EtCO2 (우측: Self Breathing) -->
                 <div class="control-group etco2-color">
-                    <div class="input-row">
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button type="button" class="btn-vital-alarm" data-alarm-target="etco2">Alarm</button>
+                    <button type="button" class="btn-vital-alarm" data-alarm-target="etco2">Alarm</button>
+                    <div class="control-right-wrap">
+                        <div class="input-row">
                             <label>EtCO2:</label>
+                            <div class="inline-chk-group">
+                                <label class="inline-chk-label etco2-color">
+                                    <input type="checkbox" id="ctrl-self-breathing" tabindex="11"> Self Breathing
+                                </label>
+                            </div>
+                            <input type="number" id="input-etco2" min="1" max="100" value="34" tabindex="6">
                         </div>
-                        <div class="inline-chk-group">
-                            <label class="inline-chk-label etco2-color">
-                                <input type="checkbox" id="ctrl-self-breathing" tabindex="11"> Self Breathing
-                            </label>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-etco2" data-step="1">−</button>
+                            <input type="range" id="ctrl-etco2" min="1" max="100" value="34" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-etco2" data-step="1">+</button>
                         </div>
-                        <input type="number" id="input-etco2" min="1" max="100" value="34" tabindex="6">
-                    </div>
-                    <div class="slider-row">
-                        <button class="step-btn minus" data-target="ctrl-etco2" data-step="1">−</button>
-                        <input type="range" id="ctrl-etco2" min="1" max="100" value="34" tabindex="-1">
-                        <button class="step-btn plus" data-target="ctrl-etco2" data-step="1">+</button>
                     </div>
                 </div>
 
                 <!-- 7. Resp Rate (RR) -->
                 <div class="control-group rr-color">
-                    <div class="input-row">
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button type="button" class="btn-vital-alarm" data-alarm-target="rr">Alarm</button>
+                    <button type="button" class="btn-vital-alarm" data-alarm-target="rr">Alarm</button>
+                    <div class="control-right-wrap">
+                        <div class="input-row">
                             <label>Resp Rate (RR):</label>
+                            <input type="number" id="input-rr" min="2" max="40" value="10" tabindex="7">
                         </div>
-                        <input type="number" id="input-rr" min="2" max="40" value="10" tabindex="7">
-                    </div>
-                    <div class="slider-row">
-                        <button class="step-btn minus" data-target="ctrl-rr" data-step="1">−</button>
-                        <input type="range" id="ctrl-rr" min="2" max="40" value="10" tabindex="-1">
-                        <button class="step-btn plus" data-target="ctrl-rr" data-step="1">+</button>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-rr" data-step="1">−</button>
+                            <input type="range" id="ctrl-rr" min="2" max="40" value="10" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-rr" data-step="1">+</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 8. Body Temp (BT) -->
                 <div class="control-group bt-color">
-                    <div class="input-row">
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <button type="button" class="btn-vital-alarm" data-alarm-target="bt">Alarm</button>
+                    <button type="button" class="btn-vital-alarm" data-alarm-target="bt">Alarm</button>
+                    <div class="control-right-wrap">
+                        <div class="input-row">
                             <label>Body Temp (BT):</label>
+                            <input type="number" id="input-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="8">
                         </div>
-                        <input type="number" id="input-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="8">
-                    </div>
-                    <div class="slider-row">
-                        <button class="step-btn minus" data-target="ctrl-bt" data-step="0.1">−</button>
-                        <input type="range" id="ctrl-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="-1">
-                        <button class="step-btn plus" data-target="ctrl-bt" data-step="0.1">+</button>
+                        <div class="slider-row">
+                            <button class="step-btn minus" data-target="ctrl-bt" data-step="0.1">−</button>
+                            <input type="range" id="ctrl-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="-1">
+                            <button class="step-btn plus" data-target="ctrl-bt" data-step="0.1">+</button>
+                        </div>
                     </div>
                 </div>
             </div>
