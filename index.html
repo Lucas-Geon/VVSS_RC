@@ -30,10 +30,10 @@
             position: absolute; 
             left: 2vw; 
             top: 3vh;
-            width: calc(75vh * 1.3); 
+            width: calc(75vh * 1.6); 
             min-width: 260px;
             max-width: 98vw;
-            aspect-ratio: 1.3; 
+            aspect-ratio: 1.6; 
             background-image: url('empty monitor.png'); 
             background-size: 100% 100%; 
             background-position: center;
@@ -64,7 +64,7 @@
             z-index: 250;
             touch-action: none;
         }
-        .resizer-handle::after {
+	.resizer-handle::after {
             content: '';
             position: absolute;
             right: 6px;
@@ -73,6 +73,84 @@
             height: 10px;
             border-right: 3px solid rgba(255, 255, 255, 0.7);
             border-bottom: 3px solid rgba(255, 255, 255, 0.7);
+        }
+
+	/* 🟢 우측 상단 리사이저 핸들 스타일 */
+        .resizer-handle-tr {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            cursor: nesw-resize;
+            z-index: 10; /* 버튼(min-btn)보다 아래로 내려서 클릭 방해 차단 */
+            touch-action: none;
+        }
+	#monitor-resizer-tr { z-index: 250; }
+
+        .edge-handle {
+            position: absolute;
+            top: 24px;
+            bottom: 32px;
+            width: 12px;
+            cursor: ew-resize;
+            z-index: 240;
+            touch-action: none;
+        }
+        .edge-left  { left: -6px; }
+        .edge-right { right: -6px; }
+        .resizer-handle-tr::after {
+            content: '';
+            position: absolute;
+            right: 6px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-right: 3px solid rgba(255, 255, 255, 0.7);
+            border-top: 3px solid rgba(255, 255, 255, 0.7);
+        }
+	/* 🟢 좌측 하단 리사이저 핸들 */
+        .resizer-handle-bl {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 28px;
+            height: 28px;
+            cursor: nesw-resize;
+            z-index: 250;
+            touch-action: none;
+        }
+        .resizer-handle-bl::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            bottom: 6px;
+            width: 10px;
+            height: 10px;
+            border-left: 3px solid rgba(255, 255, 255, 0.7);
+            border-bottom: 3px solid rgba(255, 255, 255, 0.7);
+        }
+
+        /* 🟢 좌측 상단 리사이저 핸들 */
+        .resizer-handle-tl {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            cursor: nwse-resize;
+            z-index: 250;
+            touch-action: none;
+        }
+        .resizer-handle-tl::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-left: 3px solid rgba(255, 255, 255, 0.7);
+            border-top: 3px solid rgba(255, 255, 255, 0.7);
         }
 
         #power-btn-overlay {
@@ -85,7 +163,6 @@
             cursor: pointer; 
             z-index: 200;
         }
-
         #mute-btn-overlay {
             position: absolute;
             bottom: 4%;  
@@ -97,13 +174,14 @@
             z-index: 200;
         }
 
-        .panel-header {
+	.panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #444;
             padding-bottom: 5px;
             margin-bottom: 5px;
+            padding-right: 24px; /* 👈 우측 상단 핸들과 버튼 겹침 방지 여백 */
             cursor: move;
             flex-wrap: wrap;
             gap: 4px;
@@ -128,7 +206,7 @@
         }
         .panel-top-btn:hover { filter: brightness(1.2); }
 
-        .min-btn {
+	.min-btn {
             background: #3a3a3a;
             color: #ccc;
             border: 1px solid #555;
@@ -143,6 +221,8 @@
             font-weight: bold;
             line-height: 1;
             padding: 0;
+            position: relative;
+            z-index: 50; /* 👈 클릭 최우선 보장 */
         }
         .min-btn:hover {
             background: #555;
@@ -295,48 +375,73 @@
             touch-action: pan-y !important;
         }
 
+       /* 1열 배치로 변경 */
         .controls-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
             width: 100%;
             box-sizing: border-box;
         }
 
-        .controls-col {
+        .control-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
             width: 100%;
+            gap: 3px;
             min-width: 0;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 5px 6px;
+            border-radius: 6px;
+            box-sizing: border-box;
         }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; gap: 4px; }
+        .input-row label { font-size: 11px; margin: 0; font-weight: 600; white-space: nowrap; }
 
-        .control-group { display: flex; flex-direction: column; width: 100%; gap: 1px; min-width: 0; }
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
-        .input-row label { font-size: 9.5px; margin: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* 🟢 컨트롤러 제목 라벨 알람 트리거 스타일 */
-        .ctrl-title-btn {
+        /* 🟡 노란색 Alarm 버튼 스타일 */
+        .btn-vital-alarm {
+            background-color: #ffc107;
+            color: #000000;
+            border: 1px solid #ffdb4d;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: bold;
             cursor: pointer;
-            transition: 0.15s ease;
-            user-select: none;
-            padding: 1px 3px;
-            border-radius: 3px;
+            flex-shrink: 0;
+            transition: 0.15s;
         }
-        .ctrl-title-btn:hover {
-            filter: brightness(1.4);
-            text-shadow: 0 0 6px currentColor;
-            background: rgba(255,255,255,0.08);
+        .btn-vital-alarm:hover { background-color: #ffca2c; }
+        .btn-vital-alarm:active { transform: scale(0.93); background-color: #e0a800; }
+
+        /* 우측 인라인 체크박스 (DBP sync, ABP, T-Wave Inv, Self Breathing) */
+        .inline-chk-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+            margin-right: 4px;
         }
-        .ctrl-title-btn:active {
-            transform: scale(0.95);
+        .inline-chk-label {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10.5px !important;
+            font-weight: bold !important;
+            cursor: pointer;
+            margin: 0;
+        }
+        .inline-chk-label input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+            transform: scale(1.1);
         }
 
         .slider-row {
             display: flex;
             align-items: center;
-            gap: 2px;
-            margin: 1px 0 2px 0;
+            gap: 6px;
+            margin: 1px 0;
             width: 100%;
             box-sizing: border-box;
         }
@@ -345,16 +450,17 @@
             min-width: 0;
             margin: 0;
             cursor: pointer;
-            height: 14px;
+            height: 18px;
         }
+        /* '-' / '+' 버튼 1.5배 확대 (18px -> 27px) */
         .step-btn {
             background: #444;
             color: #fff;
-            border: none;
-            border-radius: 3px;
-            width: 18px;
-            height: 18px;
-            font-size: 11px;
+            border: 1px solid #666;
+            border-radius: 5px;
+            width: 27px;
+            height: 27px;
+            font-size: 16px;
             font-weight: bold;
             line-height: 1;
             cursor: pointer;
@@ -364,6 +470,26 @@
             padding: 0;
             flex-shrink: 0;
             user-select: none;
+        }
+
+        /* 상단 2행: Volume 우측 Start, Stand by, Mute 확대 배치 */
+        .header-action-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            margin-top: 3px;
+        }
+        .header-action-row select {
+            padding: 6px 4px;
+            font-size: 11.5px;
+            flex-shrink: 0;
+        }
+        .header-action-row .panel-top-btn {
+            flex: 1;
+            padding: 7px 4px;
+            font-size: 12px;
+            text-align: center;
         }
         .step-btn:hover { background: #666; }
         .step-btn:active { background: #888; }
@@ -684,42 +810,53 @@
             box-shadow: 0 0 8px rgba(33, 150, 243, 0.6);
         }
 
-        /* 🎬 전체화면 동영상 재생 오버레이 */
-        #video-fullscreen-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 99999;
-        }
-        #video-fullscreen-overlay video {
-            max-width: 95vw;
-            max-height: 95vh;
-            outline: none;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
-            border-radius: 8px;
-        }
-        #btn-close-video {
-            position: absolute;
-            top: 20px;
-            right: 25px;
-            font-size: 32px;
-            color: #ffffff;
-            cursor: pointer;
-            user-select: none;
-            z-index: 100000;
-            line-height: 1;
-            transition: transform 0.2s, color 0.2s;
-        }
-        #btn-close-video:hover {
-            color: #ff5252;
-            transform: scale(1.2);
-        }
+/* 🎬 전체화면 동영상 재생 오버레이 */
+      #video-fullscreen-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.96);
+          display: none;
+          justify-content: center;
+          align-items: center;
+          z-index: 2147483640 !important; /* 브라우저 최대 z-index */
+          touch-action: none;
+      }
+      #video-fullscreen-overlay video {
+          max-width: 92vw;
+          max-height: 88vh;
+          outline: none;
+          box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+          border-radius: 8px;
+          pointer-events: none; /* 비디오 요소가 클릭을 훔쳐가지 못하도록 방지 */
+      }
+      #btn-close-video {
+          position: fixed; /* absolute 대신 fixed로 뷰포트 고정 */
+          top: 15px;
+          right: 20px;
+          width: 50px;
+          height: 50px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 34px;
+          font-weight: bold;
+          color: #ffffff;
+          background: rgba(40, 40, 40, 0.7);
+          border-radius: 50%;
+          cursor: pointer;
+          user-select: none;
+          z-index: 2147483647 !important; /* 최상단 무조건 보장 */
+          line-height: 1;
+          pointer-events: auto !important;
+          transition: background 0.2s, transform 0.2s;
+      }
+      #btn-close-video:hover {
+          background: #d32f2f;
+          transform: scale(1.1);
+      }
 
         /* 🟢 Save changes? (Yes / No) 커스텀 모달 스타일 */
         #save-confirm-modal {
@@ -843,7 +980,7 @@
                 top: calc(1vh + (98vw / 1.3) + 6px);
                 width: 100vw;
                 max-width: 100vw;
-                max-height: calc(99vh - (98vw / 1.3) - 6px);
+                max-height: calc(99vh - (98vw / 1.6) - 6px);
                 border-radius: 12px 12px 0 0;
             }
 
@@ -858,7 +995,7 @@
 </head>
 <body>
 <div id="video-fullscreen-overlay">
-        <span id="btn-close-video" title="닫기 (ESC)">✕</span>
+        <span id="btn-close-video" title="닫기 (ESC)" onclick="closeVideoFullscreen(event)">✕</span>
         <video id="player-fullscreen-video" playsinline></video>
     </div>
     <!-- 🟢 Save Changes 확인 모달 (Yes(Save) / No(Discard)) -->
@@ -874,7 +1011,12 @@
 
     <div id="monitor-wrapper">
         <div id="monitor-handle" title="상단 베젤을 잡고 이동"></div>
-        <div id="monitor-resizer" class="resizer-handle" title="크기 조절"></div>
+        <div id="monitor-resizer" class="resizer-handle" title="크기 조절(우측 하단)"></div>
+        <div id="monitor-resizer-tr" class="resizer-handle-tr" title="크기 조절 (우측 상단)"></div>
+        <div id="monitor-resizer-bl" class="resizer-handle-bl" title="크기 조절 (좌측 하단)"></div>
+        <div id="monitor-resizer-tl" class="resizer-handle-tl" title="크기 조절 (좌측 상단)"></div>
+        <div id="monitor-edge-left" class="edge-handle edge-left" title="좌우로 늘리기"></div>
+        <div id="monitor-edge-right" class="edge-handle edge-right" title="좌우로 늘리기"></div>
         <div id="power-btn-overlay" title="전원 버튼 (Stand by)"></div>
         <div id="mute-btn-overlay" title="음소거 (Mute)"></div>
 
@@ -952,13 +1094,17 @@
     <!-- 🟢 컨트롤 패널 -->
     <div id="controls">
         <div class="panel-header" id="controls-header" title="패널 헤더를 잡고 이동">
-            <div style="display: flex; align-items: center; gap: 3px; flex-wrap: wrap; flex: 1; min-width: 0;">
-                <div class="panel-title" style="font-size: 12.5px;">Control Panel</div>
-                <div id="connection-status" style="font-size: 9.5px; font-weight: bold; color: #ff0000; padding: 1px 3px; border-radius: 3px; background: rgba(0,0,0,0.3);">Disconnected</div>
-                <button id="btn-panel-start" class="panel-top-btn" style="background:#28a745; color:#fff;">Start</button>
-                <button id="btn-panel-standby" class="panel-top-btn" style="background:#ffc107; color:#000;">Stand by</button>
-                <button id="btn-panel-mute" class="panel-top-btn" style="background:#6c757d; color:#fff;">Mute</button>
-                <select id="ctrl-volume" class="panel-top-btn" style="background:#111; color:#fff; border:1px solid #555; outline:none;" title="마우스 휠로 조절 가능">
+            <!-- 1행: Control Panel + Connection 상태 + VVSS Community -->
+            <div style="display: flex; align-items: center; gap: 5px; flex: 1; min-width: 0;">
+                <div class="panel-title" style="font-size: 13px;">Control Panel</div>
+                <div id="connection-status" style="font-size: 10px; font-weight: bold; color: #ff0000; padding: 2px 5px; border-radius: 3px; background: rgba(0,0,0,0.4);">Disconnected</div>
+                <button type="button" class="panel-top-btn" style="background:#5c4b8b; color:#fff; border:1px solid #7c6bb0; margin-left: auto;" onclick="window.open('https://padlet.com/geonjiyong/VVSS', '_blank')" title="의견 및 프리셋 공유 패들렛 열기">💬 VVSS Community</button>
+            </div>
+            <button class="min-btn" id="ctrl-min-btn" title="최소화/열기">−</button>
+
+            <!-- 2행: Volume 좌측 + Start / Stand by / Mute 확대 배치 -->
+            <div class="header-action-row">
+                <select id="ctrl-volume" style="background:#111; color:#fff; border:1px solid #555; border-radius:4px; font-weight:bold; outline:none;" title="마우스 휠로 조절 가능">
                     <option value="100">Vol: 100%</option>
                     <option value="90">Vol: 90%</option>
                     <option value="80">Vol: 80%</option>
@@ -971,134 +1117,166 @@
                     <option value="10">Vol: 10%</option>
                     <option value="0">Vol: 0%</option>
                 </select>
-                <!-- ✅ 패들렛 커뮤니티 바로가기 버튼 추가 -->
-                <button type="button" class="panel-top-btn" style="background:#5c4b8b; color:#fff; border:1px solid #7c6bb0;" onclick="window.open('https://padlet.com/geonjiyong/VVSS', '_blank')" title="의견 및 프리셋 공유 패들렛 열기">💬 VVSS Community</button>
+                <button id="btn-panel-start" class="panel-top-btn" style="background:#28a745; color:#fff;">Start</button>
+                <button id="btn-panel-standby" class="panel-top-btn" style="background:#ffc107; color:#000;">Stand by</button>
+                <button id="btn-panel-mute" class="panel-top-btn" style="background:#6c757d; color:#fff;">Mute</button>
             </div>
-            <button class="min-btn" id="ctrl-min-btn" title="최소화/열기">−</button>
         </div>
-        <div id="controls-resizer" class="resizer-handle" title="크기 조절"></div>
-        
+        <div id="controls-resizer" class="resizer-handle" title="크기 조절(우측 하단)"></div>
+        <div id="controls-resizer-tr" class="resizer-handle-tr" title="크기 조절 (우측 상단)"></div>
         <div id="controls-body" style="display: flex; flex-direction: column; gap: 5px; padding-bottom: 12px;">
+<div class="scenario-section" id="vital-sign-section" style="margin-top: 0; padding: 6px; gap: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 11px; font-weight: bold; color: #00ff00; letter-spacing: 0.5px;">[Vital sign]</span>
+                    <button type="button" class="min-btn" id="btn-min-vitals" title="Vital sign 접기/열기" style="width: 18px; height: 18px; font-size: 11px;">−</button>
+                </div>
+                <div id="vital-sign-body" style="display: flex; flex-direction: column; gap: 5px;">
             <div class="controls-layout">
-                <!-- ⬅️ 좌측 그룹 -->
-                <div class="controls-col">
-                    <div class="control-group" style="color:#ff0000;">
-                        <div class="input-row">
-                            <label class="ctrl-title-btn" data-alarm-target="nbp" title="클릭 시 모니터에 알람 3회 표출">SBP (Sys):</label>
-                            <input type="number" id="input-sys" min="10" max="300" value="121" tabindex="1">
+                <!-- 1. SBP (우측: SBP sync, ABP) -->
+                <div class="control-group" style="color:#ff0000;">
+                    <div class="input-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn-vital-alarm" data-alarm-target="nbp">Alarm</button>
+                            <label>SBP (Sys):</label>
                         </div>
-                        <div class="slider-row">
-                            <button class="step-btn minus" data-target="ctrl-sys" data-step="5">−</button>
-                            <input type="range" id="ctrl-sys" min="10" max="300" value="121" tabindex="-1">
-                            <button class="step-btn plus" data-target="ctrl-sys" data-step="5">+</button>
+                        <div class="inline-chk-group">
+                            <label class="inline-chk-label" style="color:#ffaaaa;">
+                                <input type="checkbox" id="ctrl-dbp-sync" checked> SBP sync
+                            </label>
+                            <label class="inline-chk-label" style="color:#ff4d4d;">
+                                <input type="checkbox" id="ctrl-abp" tabindex="10"> ABP
+                            </label>
                         </div>
+                        <input type="number" id="input-sys" min="10" max="300" value="121" tabindex="1">
                     </div>
-                    
-                    <div class="control-group" style="color:#ff0000;">
-                        <div class="input-row">
-                            <label class="ctrl-title-btn" data-alarm-target="nbp" title="클릭 시 모니터에 알람 3회 표출">DBP (Dia):</label>
-                            <input type="number" id="input-dia" min="20" max="180" value="79" tabindex="2">
-                        </div>
-                        <div class="slider-row">
-                            <button class="step-btn minus" data-target="ctrl-dia" data-step="5">−</button>
-                            <input type="range" id="ctrl-dia" min="20" max="180" value="79" tabindex="-1">
-                            <button class="step-btn plus" data-target="ctrl-dia" data-step="5">+</button>
-                        </div>
-                        <label style="font-size: 9px; color: #aaa; display: flex; align-items: center; margin-top: 1px;">
-                            <input type="checkbox" id="ctrl-dbp-sync" style="margin-right: 3px; cursor: pointer;" checked> DBP sync
-                        </label>
+                    <div class="slider-row">
+                        <button class="step-btn minus" data-target="ctrl-sys" data-step="5">−</button>
+                        <input type="range" id="ctrl-sys" min="10" max="300" value="121" tabindex="-1">
+                        <button class="step-btn plus" data-target="ctrl-sys" data-step="5">+</button>
                     </div>
-
-                    <div class="control-group ecg-color">
-                        <div class="input-row">
-                            <label class="ctrl-title-btn" data-alarm-target="hr" title="클릭 시 모니터에 알람 3회 표출">Heart Rate (HR):</label>
-                            <input type="number" id="input-hr" min="20" max="300" value="61" tabindex="3">
+                </div>
+                
+                <!-- 2. DBP -->
+                <div class="control-group" style="color:#ff0000;">
+                    <div class="input-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn-vital-alarm" data-alarm-target="nbp">Alarm</button>
+                            <label>DBP (Dia):</label>
                         </div>
-                        <div class="slider-row">
-                            <button class="step-btn minus" data-target="ctrl-hr" data-step="3">−</button>
-                            <input type="range" id="ctrl-hr" min="20" max="300" value="61" tabindex="-1">
-                            <button class="step-btn plus" data-target="ctrl-hr" data-step="3">+</button>
-                        </div>
+                        <input type="number" id="input-dia" min="20" max="180" value="79" tabindex="2">
                     </div>
-                    
-                    <div class="control-group ecg-color">
-                        <div class="input-row">
-                            <label class="ctrl-title-btn" data-alarm-target="hr" title="클릭 시 모니터에 알람 3회 표출">ST Level:</label>
-                            <input type="number" id="input-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="4">
-                        </div>
-                        <div class="slider-row">
-                            <button class="step-btn minus" data-target="ctrl-st" data-step="0.5">−</button>
-                            <input type="range" id="ctrl-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="-1">
-                            <button class="step-btn plus" data-target="ctrl-st" data-step="0.5">+</button>
-                        </div>
+                    <div class="slider-row">
+                        <button class="step-btn minus" data-target="ctrl-dia" data-step="5">−</button>
+                        <input type="range" id="ctrl-dia" min="20" max="180" value="79" tabindex="-1">
+                        <button class="step-btn plus" data-target="ctrl-dia" data-step="5">+</button>
                     </div>
                 </div>
 
-                <!-- ➡️ 우측 그룹 -->
-                <div class="controls-col">
-                    <div class="control-group spo2-color">
-                        <div class="input-row">
-                            <label class="ctrl-title-btn" data-alarm-target="spo2" title="클릭 시 모니터에 알람 3회 표출">SpO2 (%):</label>
-                            <input type="number" id="input-spo2" min="20" max="100" value="100" tabindex="5">
+                <!-- 3. Heart Rate (HR) -->
+                <div class="control-group ecg-color">
+                    <div class="input-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn-vital-alarm" data-alarm-target="hr">Alarm</button>
+                            <label>Heart Rate (HR):</label>
                         </div>
-                        <div class="slider-row">
-                            <button class="step-btn minus" data-target="ctrl-spo2" data-step="1">−</button>
-                            <input type="range" id="ctrl-spo2" min="20" max="100" value="100" tabindex="-1">
-                            <button class="step-btn plus" data-target="ctrl-spo2" data-step="1">+</button>
-                        </div>
+                        <input type="number" id="input-hr" min="20" max="300" value="61" tabindex="3">
                     </div>
-
-                    <div class="control-group etco2-color">
-                        <div class="input-row">
-                            <label class="ctrl-title-btn" data-alarm-target="etco2" title="클릭 시 모니터에 알람 3회 표출">EtCO2:</label>
-                            <input type="number" id="input-etco2" min="1" max="100" value="34" tabindex="6">
-                        </div>
-                        <div class="slider-row">
-                            <button class="step-btn minus" data-target="ctrl-etco2" data-step="1">−</button>
-                            <input type="range" id="ctrl-etco2" min="1" max="100" value="34" tabindex="-1">
-                            <button class="step-btn plus" data-target="ctrl-etco2" data-step="1">+</button>
-                        </div>
-                    </div>
-
-                    <div class="control-group rr-color">
-                        <div class="input-row">
-                            <label class="ctrl-title-btn" data-alarm-target="rr" title="클릭 시 모니터에 알람 3회 표출">Resp Rate (RR):</label>
-                            <input type="number" id="input-rr" min="2" max="40" value="10" tabindex="7">
-                        </div>
-                        <div class="slider-row">
-                            <button class="step-btn minus" data-target="ctrl-rr" data-step="1">−</button>
-                            <input type="range" id="ctrl-rr" min="2" max="40" value="10" tabindex="-1">
-                            <button class="step-btn plus" data-target="ctrl-rr" data-step="1">+</button>
-                        </div>
-                    </div>
-
-                    <div class="control-group bt-color">
-                        <div class="input-row">
-                            <label class="ctrl-title-btn" data-alarm-target="bt" title="클릭 시 모니터에 알람 3회 표출">Body Temp (BT):</label>
-                            <input type="number" id="input-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="8">
-                        </div>
-                        <div class="slider-row">
-                            <button class="step-btn minus" data-target="ctrl-bt" data-step="0.1">−</button>
-                            <input type="range" id="ctrl-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="-1">
-                            <button class="step-btn plus" data-target="ctrl-bt" data-step="0.1">+</button>
-                        </div>
+                    <div class="slider-row">
+                        <button class="step-btn minus" data-target="ctrl-hr" data-step="3">−</button>
+                        <input type="range" id="ctrl-hr" min="20" max="300" value="61" tabindex="-1">
+                        <button class="step-btn plus" data-target="ctrl-hr" data-step="3">+</button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="mode-row">
-                <label class="ecg-color">
-                    <input type="checkbox" id="ctrl-twave" style="width: auto; margin: 0 3px 0 0; cursor: pointer;" tabindex="9">
-                    T-Wave Inv
-                </label>
-                <label style="color: #ff0000;">
-                    <input type="checkbox" id="ctrl-abp" style="width: auto; margin: 0 3px 0 0; cursor: pointer;" tabindex="10">
-                    ABP
-                </label>
-                <label class="etco2-color">
-                    <input type="checkbox" id="ctrl-self-breathing" style="width: auto; margin: 0 3px 0 0; cursor: pointer;" tabindex="11">
-                    Self Breathing
-                </label>
+                
+                <!-- 4. ST Level (우측: T-Wave Inversion) -->
+                <div class="control-group ecg-color">
+                    <div class="input-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn-vital-alarm" data-alarm-target="hr">Alarm</button>
+                            <label>ST Level:</label>
+                        </div>
+                        <div class="inline-chk-group">
+                            <label class="inline-chk-label ecg-color">
+                                <input type="checkbox" id="ctrl-twave" tabindex="9"> T-Wave Inv
+                            </label>
+                        </div>
+                        <input type="number" id="input-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="4">
+                    </div>
+                    <div class="slider-row">
+                        <button class="step-btn minus" data-target="ctrl-st" data-step="0.5">−</button>
+                        <input type="range" id="ctrl-st" min="-3.0" max="6.0" step="0.1" value="0.0" tabindex="-1">
+                        <button class="step-btn plus" data-target="ctrl-st" data-step="0.5">+</button>
+                    </div>
+                </div>
+
+                <!-- 5. SpO2 (%) -->
+                <div class="control-group spo2-color">
+                    <div class="input-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn-vital-alarm" data-alarm-target="spo2">Alarm</button>
+                            <label>SpO2 (%):</label>
+                        </div>
+                        <input type="number" id="input-spo2" min="20" max="100" value="100" tabindex="5">
+                    </div>
+                    <div class="slider-row">
+                        <button class="step-btn minus" data-target="ctrl-spo2" data-step="1">−</button>
+                        <input type="range" id="ctrl-spo2" min="20" max="100" value="100" tabindex="-1">
+                        <button class="step-btn plus" data-target="ctrl-spo2" data-step="1">+</button>
+                    </div>
+                </div>
+
+                <!-- 6. EtCO2 (우측: Self Breathing) -->
+                <div class="control-group etco2-color">
+                    <div class="input-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn-vital-alarm" data-alarm-target="etco2">Alarm</button>
+                            <label>EtCO2:</label>
+                        </div>
+                        <div class="inline-chk-group">
+                            <label class="inline-chk-label etco2-color">
+                                <input type="checkbox" id="ctrl-self-breathing" tabindex="11"> Self Breathing
+                            </label>
+                        </div>
+                        <input type="number" id="input-etco2" min="1" max="100" value="34" tabindex="6">
+                    </div>
+                    <div class="slider-row">
+                        <button class="step-btn minus" data-target="ctrl-etco2" data-step="1">−</button>
+                        <input type="range" id="ctrl-etco2" min="1" max="100" value="34" tabindex="-1">
+                        <button class="step-btn plus" data-target="ctrl-etco2" data-step="1">+</button>
+                    </div>
+                </div>
+
+                <!-- 7. Resp Rate (RR) -->
+                <div class="control-group rr-color">
+                    <div class="input-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn-vital-alarm" data-alarm-target="rr">Alarm</button>
+                            <label>Resp Rate (RR):</label>
+                        </div>
+                        <input type="number" id="input-rr" min="2" max="40" value="10" tabindex="7">
+                    </div>
+                    <div class="slider-row">
+                        <button class="step-btn minus" data-target="ctrl-rr" data-step="1">−</button>
+                        <input type="range" id="ctrl-rr" min="2" max="40" value="10" tabindex="-1">
+                        <button class="step-btn plus" data-target="ctrl-rr" data-step="1">+</button>
+                    </div>
+                </div>
+
+                <!-- 8. Body Temp (BT) -->
+                <div class="control-group bt-color">
+                    <div class="input-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn-vital-alarm" data-alarm-target="bt">Alarm</button>
+                            <label>Body Temp (BT):</label>
+                        </div>
+                        <input type="number" id="input-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="8">
+                    </div>
+                    <div class="slider-row">
+                        <button class="step-btn minus" data-target="ctrl-bt" data-step="0.1">−</button>
+                        <input type="range" id="ctrl-bt" min="30.0" max="45.0" step="0.1" value="36.3" tabindex="-1">
+                        <button class="step-btn plus" data-target="ctrl-bt" data-step="0.1">+</button>
+                    </div>
+                </div>
             </div>
 
             <!-- 🟢 환자 상태 원클릭 변화 버튼 -->
@@ -1123,14 +1301,15 @@
             <div class="control-group" style="margin-top: 2px;">
                 <div class="input-row">
                     <label class="ecg-color" style="font-size:10.5px; font-weight:bold;">ECG Rhythm:</label>
-                    <select id="ctrl-rhythm" style="background:#111; color:#00ff00; border:1px solid #555; padding:3px 4px; border-radius:4px; width:68%; font-weight:bold; cursor:pointer; font-size:10px;">
+	<select id="ctrl-rhythm" style="background:#111; color:#00ff00; border:1px solid #555; padding:3px 4px; border-radius:4px; width:68%; font-weight:bold; cursor:pointer; font-size:10px;">
                         <option value="normal">Normal Sinus</option>
                         <option value="pvc">Occasional PVC</option>
                         <option value="bigeminy">Bigeminy PVC</option>
                         <option value="trigeminy">Trigeminy PVC</option>
                         <option value="afib">A-Fib</option>
                         <option value="aflutter">A-Flutter</option>
-                        <option value="vt">V-Tach (VT)</option>
+                        <option value="pvt">Pulseless VT</option>
+                        <option value="uvt">Unstable VT</option>
                         <option value="vf">V-Fib (VF)</option>
                     </select>
                 </div>
@@ -1162,7 +1341,8 @@
                     <input type="range" id="ctrl-cleft-depth" min="0.1" max="0.8" step="0.05" value="0.4">
                 </div>
             </div>
-
+	</div>
+	</div>
             <!-- 🟢 [Alarm Limits Configuration] 조절 서브패널 (접이식 default) -->
             <div class="alarm-limits-section">
                 <div class="alarm-limits-header" id="btn-toggle-limits">
@@ -1265,7 +1445,10 @@
                 <!-- 2단: Video Clip 영역 -->
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:11px; font-weight:bold; color:#64b5f6;">Video Clips</span>
-                    <button type="button" class="btn-preset-ctrl" id="btn-add-video" style="padding: 3px 6px; background-color:#0b3d60; border-color:#1976d2;">+ Add Video</button>
+	<div style="display:flex; align-items:center; gap:5px;">
+                        <button type="button" id="btn-stop-video" title="동영상 정지/닫기 (ESC)" style="width:24px; 	height:24px; background:#d32f2f; border:1px solid #ff5252; border-radius:4px; color:#fff; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">■</button>
+                        <button type="button" class="btn-preset-ctrl" id="btn-add-video" style="padding: 3px 6px; background-color:#0b3d60; border-color:#1976d2;">+ Add Video</button>
+                    </div>
                 </div>
                 <div class="scenario-grid" id="scenario-video-grid"></div>
             </div>
@@ -1283,7 +1466,7 @@
             <button class="min-btn" id="qr-min-btn" title="최소화/열기">−</button>
         </div>
         <div id="qr-resizer" class="resizer-handle" title="크기 조절"></div>
-
+        <div id="qr-resizer-tr" class="resizer-handle-tr" title="크기 조절 (우측 상단)"></div>
         <div id="qr-body" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
             <div id="qr-box"></div>
             <button class="session-btn" onclick="promptChangeSession()">Change Session ID</button>
@@ -1402,38 +1585,51 @@
         // ==========================================
         // 🟢 시나리오 프리셋 관리 시스템 데이터 및 로직
         // ==========================================
-        const DEFAULT_PRESET_DATA = {
-            currentSet: "RC 시나리오 (기본)",
-            sets: {
-	"RC 시나리오 (기본)": [
-    	{ name: "#1-1", vitals: { sys: 124, dia: 83, hr: 70, spo2: 98,  etco2: 41, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-   	 { name: "#1-2", vitals: { sys: 119, dia: 75, hr: 70, spo2: 100, etco2: 36, rr: 12, bt: 36.3, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-  	  { name: "#2-1", vitals: { sys: 75,  dia: 50, hr: 65, spo2: 100, etco2: 31, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-  	  { name: "#2-2", vitals: { sys: 102, dia: 68, hr: 75, spo2: 100, etco2: 33, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-  	  { name: "#3-1", vitals: { sys: 81,  dia: 54, hr: 75, spo2: 100, etco2: 32, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-   	 { name: "#3-2", vitals: { sys: 93,  dia: 65, hr: 78, spo2: 100, etco2: 34, rr: 11, bt: 36.1, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-   	 { name: "#4-1", vitals: { sys: 132, dia: 88, hr: 81, spo2: 98,  etco2: 43, rr: 11, bt: 36.1, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-   	 { name: "#4-2", vitals: { sys: 125, dia: 83, hr: 85, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-  	  { name: "#5-1", vitals: { sys: 117, dia: 78, hr: 81, spo2: 99,  etco2: 42, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'curare', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: true,  abpMode: false, dbpSync: true } },
-  	  { name: "#5-2", vitals: { sys: 115, dia: 77, hr: 85, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-   	 { name: "#6-1", vitals: { sys: 152, dia: 101,hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
-   	 { name: "#6-2", vitals: { sys: 122, dia: 81, hr: 78, spo2: 100, etco2: 35, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } }
-	],
-	"MTP 대처 시나리오 프리셋": [
-	{ name: "시작", vitals: { sys: 105, dia: 69, hr: 71, spo2: 100, etco2: 38, rr: 12, bt: 36.1, st: 0.4, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#1", vitals: { sys: 72, dia: 38, hr: 124, spo2: 95, etco2: 28, rr: 14, bt: 35.9, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#2", vitals: { sys: 92, dia: 51, hr: 125, spo2: 96, etco2: 30, rr: 14, bt: 35.9, st: 0.6, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#3-1", vitals: { sys: 85, dia: 48, hr: 125, spo2: 97, etco2: 30, rr: 12, bt: 35.8, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#3-2", vitals: { sys: 101, dia: 62, hr: 121, spo2: 98, etco2: 32, rr: 12, bt: 35.7, st: 0.5, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#4-1", vitals: { sys: 78, dia: 42, hr: 120, spo2: 95, etco2: 26, rr: 14, bt: 35.6, st: 0.4, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#4-2", vitals: { sys: 90, dia: 51, hr: 112, spo2: 97, etco2: 29, rr: 14, bt: 35.6, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#4-3", vitals: { sys: 96, dia: 58, hr: 115, spo2: 97, etco2: 30, rr: 14, bt: 35.7, st: 1.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#5-1", vitals: { sys: 115, dia: 72, hr: 92, spo2: 99, etco2: 35, rr: 12, bt: 35.7, st: -0.1, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#5-2", vitals: { sys: 101, dia: 66, hr: 91, spo2: 100, etco2: 34, rr: 12, bt: 35.7, st: 0.2, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
-	{ name: "#6", vitals: { sys: 98, dia: 65, hr: 95, spo2: 100, etco2: 34, rr: 11, bt: 35.7, st: 0.3, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } }
-	]
-            }
-        };
+const DEFAULT_PRESET_DATA = {
+          currentSet: "RC 시나리오 (기본)",
+          sets: {
+              "RC 시나리오 (기본)": {
+                  phases: [
+                      { name: "#1-1", vitals: { sys: 124, dia: 83, hr: 70, spo2: 98,  etco2: 41, rr: 10, bt: 36.3, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#1-2", vitals: { sys: 119, dia: 75, hr: 70, spo2: 100, etco2: 36, rr: 12, bt: 36.3, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#2-1", vitals: { sys: 75,  dia: 50, hr: 65, spo2: 100, etco2: 31, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#2-2", vitals: { sys: 102, dia: 68, hr: 75, spo2: 100, etco2: 33, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#3-1", vitals: { sys: 81,  dia: 54, hr: 75, spo2: 100, etco2: 32, rr: 12, bt: 36.2, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#3-2", vitals: { sys: 93,  dia: 65, hr: 78, spo2: 100, etco2: 34, rr: 11, bt: 36.1, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#4-1", vitals: { sys: 132, dia: 88, hr: 81, spo2: 98,  etco2: 43, rr: 11, bt: 36.1, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#4-2", vitals: { sys: 125, dia: 83, hr: 85, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#5-1", vitals: { sys: 117, dia: 78, hr: 81, spo2: 99,  etco2: 42, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'curare', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: true,  abpMode: false, dbpSync: true } },
+                      { name: "#5-2", vitals: { sys: 115, dia: 77, hr: 85, spo2: 100, etco2: 36, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#6-1", vitals: { sys: 152, dia: 101,hr: 75, spo2: 100, etco2: 30, rr: 14, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } },
+                      { name: "#6-2", vitals: { sys: 122, dia: 81, hr: 78, spo2: 100, etco2: 35, rr: 10, bt: 36.0, st: 0.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: false, dbpSync: true } }
+                  ],
+                  videos: [
+                      { name: "RC1", url: "RC1.mp4" },
+                      { name: "RC2", url: "RC2.mp4" },
+                      { name: "RC3", url: "RC3.mp4" },
+                      { name: "RC4", url: "RC4.mp4" },
+                      { name: "RC5", url: "RC5.mp4" },
+                      { name: "RC6", url: "RC6.mp4" }
+                  ]
+              },
+              "MTP 대처 시나리오 프리셋": {
+                  phases: [
+                      { name: "시작", vitals: { sys: 105, dia: 69, hr: 71, spo2: 100, etco2: 38, rr: 12, bt: 36.1, st: 0.4, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#1", vitals: { sys: 72, dia: 38, hr: 124, spo2: 95, etco2: 28, rr: 14, bt: 35.9, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#2", vitals: { sys: 92, dia: 51, hr: 125, spo2: 96, etco2: 30, rr: 14, bt: 35.9, st: 0.6, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#3-1", vitals: { sys: 85, dia: 48, hr: 125, spo2: 97, etco2: 30, rr: 12, bt: 35.8, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#3-2", vitals: { sys: 101, dia: 62, hr: 121, spo2: 98, etco2: 32, rr: 12, bt: 35.7, st: 0.5, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#4-1", vitals: { sys: 78, dia: 42, hr: 120, spo2: 95, etco2: 26, rr: 14, bt: 35.6, st: 0.4, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#4-2", vitals: { sys: 90, dia: 51, hr: 112, spo2: 97, etco2: 29, rr: 14, bt: 35.6, st: 0.8, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#4-3", vitals: { sys: 96, dia: 58, hr: 115, spo2: 97, etco2: 30, rr: 14, bt: 35.7, st: 1.0, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#5-1", vitals: { sys: 115, dia: 72, hr: 92, spo2: 99, etco2: 35, rr: 12, bt: 35.7, st: -0.1, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#5-2", vitals: { sys: 101, dia: 66, hr: 91, spo2: 100, etco2: 34, rr: 12, bt: 35.7, st: 0.2, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } },
+                      { name: "#6", vitals: { sys: 98, dia: 65, hr: 95, spo2: 100, etco2: 34, rr: 11, bt: 35.7, st: 0.3, rhythm: 'normal', etco2Pattern: 'normal', cleftDepth: 0.4, tWaveInverted: false, selfBreathing: false, abpMode: true, dbpSync: true } }
+                  ],
+                  videos: []
+              }
+          }
+      };
 
         let presetData = JSON.parse(JSON.stringify(DEFAULT_PRESET_DATA));
         let activePhaseIndex = null;
@@ -1474,9 +1670,10 @@
             btnCloseVideo: document.getElementById('btn-close-video')
         };
 
-        function loadPresetsFromStorage() {
+ function loadPresetsFromStorage() {
             try {
-                const saved = localStorage.getItem('vvss_preset_data_v1');
+                // 🔄 v2 -> v3 로 변경
+                const saved = localStorage.getItem('vvss_preset_data_v3');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed && parsed.sets && Object.keys(parsed.sets).length > 0) {
@@ -1498,7 +1695,8 @@
 
         function savePresetsToStorage() {
             try {
-                localStorage.setItem('vvss_preset_data_v1', JSON.stringify(presetData));
+                // 🔄 v2 -> v3 로 변경
+                localStorage.setItem('vvss_preset_data_v3', JSON.stringify(presetData));
             } catch (e) {
                 console.warn('Preset localStorage save failed:', e);
             }
@@ -1814,7 +2012,12 @@ function updateActivePhaseVitalsIfSelected() {
             if (!isEditMode) savePresetsToStorage();
             renderPresetUI();
         });
-
+	const btnStopVideo = document.getElementById('btn-stop-video');
+        if (btnStopVideo) {
+            btnStopVideo.addEventListener('click', (e) => {
+                closeVideoFullscreen(e);
+            });
+        }
 	// ⬇️ [여기서부터 새로 추가할 + Add Video 이벤트] ⬇️
         presetDOM.btnAddVideo.addEventListener('click', async () => {
             const currentData = normalizePresetSet(presetData.sets[presetData.currentSet]);
@@ -2134,9 +2337,13 @@ function updateActivePhaseVitalsIfSelected() {
 
                     if (DOM.ctrlVolume.value != state.volume) DOM.ctrlVolume.value = state.volume;
 
-                    if(state.rhythm === 'vf' || state.rhythm === 'vt') {
-                        DOM.rhythmLabel.innerText = state.rhythm.toUpperCase();
-                    } else if(state.rhythm === 'afib') DOM.rhythmLabel.innerText = "A-Fib";
+	if (state.rhythm === 'vf') {
+                        DOM.rhythmLabel.innerText = "VF";
+                    } else if (state.rhythm === 'pvt') {
+                        DOM.rhythmLabel.innerText = "Pulseless VT";
+                    } else if (state.rhythm === 'uvt' || state.rhythm === 'vt') {
+                        DOM.rhythmLabel.innerText = "VT";
+                    } else if (state.rhythm === 'afib') DOM.rhythmLabel.innerText = "A-Fib";
                     else if(state.rhythm === 'aflutter') DOM.rhythmLabel.innerText = "A-Flutter";
                     else DOM.rhythmLabel.innerText = "lead II";
 
@@ -2219,23 +2426,33 @@ function updateActivePhaseVitalsIfSelected() {
         // ==========================================
         // 3. 화면 UI 표시 및 Apply 분리 로직
         // ==========================================
-        function updateDisplay() {
+function updateDisplay() {
+            const rhythm = state.rhythm || 'normal';
+            // 완전 무맥박 심정지 상태 체크
+            const isArrest = (rhythm === 'vf' || rhythm === 'pvt');
+
             DOM.valBT.innerText = parseFloat(state.bt).toFixed(1);
-            DOM.valHR.innerText = state.hr;
-            DOM.valSpO2.innerText = state.spo2;
+            // 심정지 리듬이면 ??, 그 외에는 현재 환자 상태값 출력
+            DOM.valHR.innerText = isArrest ? '??' : state.hr;
+            DOM.valSpO2.innerText = isArrest ? '??' : state.spo2;
             DOM.valEtCO2.innerText = state.etco2;
             DOM.valRR.innerText = state.rr; 
-            DOM.valSys.innerText = state.sys;
-            DOM.valDia.innerText = state.dia;
+            DOM.valSys.innerText = isArrest ? '??' : state.sys;
+            DOM.valDia.innerText = isArrest ? '??' : state.dia;
             DOM.valST.innerText = parseFloat(state.st).toFixed(1);
-            
-            let sysValue = parseInt(state.sys);
-            let diaValue = parseInt(state.dia);
-            document.getElementById('val-mean').innerText = Math.round((sysValue + 2 * diaValue) / 3);
-    
+
+            let meanVal = '??';
+            if (!isArrest) {
+                let sVal = parseInt(state.sys);
+                let dVal = parseInt(state.dia);
+                meanVal = Math.round((sVal + 2 * dVal) / 3);
+            }
+            document.getElementById('val-mean').innerText = meanVal;
+
             const activeId = document.activeElement ? document.activeElement.id : '';
             const vitalInputIds = ['input-bt', 'input-hr', 'input-spo2', 'input-etco2', 'input-rr', 'input-sys', 'input-dia', 'input-st'];
             
+            // 컨트롤 패널 슬라이더/인풋 동기화
             if (!vitalInputIds.includes(activeId)) {
                 DOM.inBT.value = parseFloat(state.bt).toFixed(1);
                 DOM.inHR.value = state.hr;
@@ -2306,10 +2523,10 @@ function updateActivePhaseVitalsIfSelected() {
             }
         }
 
-        document.querySelectorAll('.ctrl-title-btn').forEach(label => {
-            label.addEventListener('click', (e) => {
+	document.querySelectorAll('.btn-vital-alarm').forEach(btn => {
+            btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const targetKey = label.getAttribute('data-alarm-target');
+                const targetKey = btn.getAttribute('data-alarm-target');
                 if (targetKey) {
                     triggerManualAlarmRemote(targetKey);
                 }
@@ -2573,10 +2790,46 @@ function updateActivePhaseVitalsIfSelected() {
             syncToFirebase({abpMode: state.abpMode});
         });
 
-        DOM.ctrlRhythm.addEventListener('change', (e) => {
+	DOM.ctrlRhythm.addEventListener('change', (e) => {
+            const prevRhythm = state.rhythm;
             state.rhythm = e.target.value;
+
+            // ⚡ 직전 기저 생체징후(Baseline)를 기반으로 생리학적 변동 적용
+            const curSys = parseInt(state.sys) || 120;
+            const curEt = parseInt(state.etco2) || 35;
+            const curSp = parseInt(state.spo2) || 98;
+            const curHr = parseInt(state.hr) || 75;
+
+            if (state.rhythm === 'vf') {
+                // 심정지: 직전 EtCO2의 약 15~20% 수준으로 급락 (최소 3 ~ 최대 8)
+                state.etco2 = Math.max(3, Math.min(8, Math.round(curEt * 0.18)));
+            } 
+            else if (state.rhythm === 'pvt') {
+                // 무맥성 VT: 직전 EtCO2 급락 + 빠른 심실 리듬 레이트
+                state.etco2 = Math.max(4, Math.min(8, Math.round(curEt * 0.20)));
+                state.hr = 200;
+            } 
+            else if (state.rhythm === 'uvt') {
+                // 불안정 VT: 기저 혈압 45~50% 수준으로 폭락, EtCO2는 20% 감소, 산소포화도 급감
+                state.hr = Math.floor(Math.random() * 21) + 170; // 170 ~ 190 bpm 랜덤
+                state.sys = Math.max(48, Math.min(75, Math.round(curSys * 0.48)));
+                state.dia = Math.max(25, Math.min(45, Math.round(state.sys * 0.55)));
+                state.etco2 = Math.max(20, Math.min(32, Math.round(curEt * 0.75)));
+                state.spo2 = Math.max(75, Math.min(88, curSp - 15));
+                
+                DOM.ctrlDbpSync.checked = false;
+                state.dbpSync = false;
+            } 
+            else if (state.rhythm === 'afib') {
+                // A-Fib 발작 시: 심방 킥 소실로 혈압 약 10% 감소, 빈맥(HR +30)
+                if (curHr < 110) state.hr = Math.min(150, curHr + 35);
+                state.sys = Math.max(70, curSys - 12);
+                state.dia = Math.max(45, Math.round(state.sys * 0.65));
+            }
+
+            updateDisplay();
             updateActivePhaseVitalsIfSelected();
-            syncToFirebase({rhythm: state.rhythm});
+            syncToFirebase(state);
             checkAutoAlarms();
         });
 
@@ -2790,8 +3043,8 @@ function updateActivePhaseVitalsIfSelected() {
             });
         });
 
-        function playBeep() {
-            if (!audioCtx || state.isMuted || state.rhythm === 'vf' || (state.volume || 0) <= 0) return; 
+	function playBeep() {
+   	 if (!audioCtx || state.isMuted || state.rhythm === 'vf' || state.rhythm === 'pvt' || (state.volume || 0) <= 0) return;
             const now = audioCtx.currentTime;
             const volRatio = (state.volume !== undefined ? state.volume : 100) / 100;
 
@@ -2915,128 +3168,48 @@ function updateActivePhaseVitalsIfSelected() {
         ro.observe(document.getElementById('monitor'));
         resizeCanvas();
 
-        let scanX = 0; const scanSpeed = 2.5; let lastYs = { ecg: 0, spo2: 0, etco2: 0, rr: 0 };
-        let lastEtco2Cycle = -1;
+	let scanX = 0; const scanSpeed = 2.5; let lastYs = { ecg: 0, spo2: 0, etco2: 0, rr: 0 };
+	let lastEtco2Cycle = -1;
 
         class CapnographyRenderer {
             static calculate(phase, pattern, cleftDepth, timeSec) {
                 let v = 0;
-                switch (pattern) {
-                    case 'curare': {
-                        const pStart = 0.25, pEnd = 0.75, rDur = 0.015, fDur = 0.015;
-                        if (phase >= pStart && phase < pStart + rDur) {
-                            v = (phase - pStart) / rDur;
-                        } else if (phase >= pStart + rDur && phase <= pEnd) {
-                            const pProg = (phase - (pStart + rDur)) / (pEnd - (pStart + rDur));
-                            let basePlateau = 1.0 + pProg * 0.04;
-                            if (pProg >= 0.45 && pProg <= 0.70) {
-                                const cProg = (pProg - 0.45) / 0.25;
-                                const dip = Math.sin(cProg * Math.PI) * (cleftDepth || 0.4);
-                                v = Math.max(0.1, basePlateau - dip);
-                            } else {
-                                v = basePlateau;
-                            }
-                        } else if (phase > pEnd && phase <= pEnd + fDur) {
-                            v = 1.04 * (1 - (phase - pEnd) / fDur);
+                
+                if (pattern === 'curare') {
+                    if (phase >= 0.22 && phase < 0.28) {
+                        v = (phase - 0.22) / 0.06;
+                    } else if (phase >= 0.28 && phase <= 0.72) {
+                        const pProg = (phase - 0.28) / 0.44;
+                        let basePlateau = 1.0 + pProg * 0.05;
+                        if (pProg >= 0.45 && pProg <= 0.70) {
+                            const cProg = (pProg - 0.45) / 0.25;
+                            const dip = Math.sin(cProg * Math.PI) * (cleftDepth || 0.4);
+                            v = Math.max(0.08, basePlateau - dip);
                         } else {
-                            v = 0;
+                            v = basePlateau;
                         }
-                        break;
+                    } else if (phase > 0.72 && phase <= 0.76) {
+                        v = 1.05 * (1 - (phase - 0.72) / 0.04);
+                    } else {
+                        v = 0;
                     }
-                    case 'ineffective': {
-                        const cycle = Math.floor(timeSec);
-                        const isMissed = (cycle % 3 === 2);
-                        if (isMissed) {
-                            if (phase >= 0.2 && phase < 0.4) {
-                                v = Math.sin((phase - 0.2) / 0.2 * Math.PI) * 0.25;
-                            } else {
-                                v = 0;
-                            }
-                        } else {
-                            if (phase >= 0.20 && phase < 0.24) {
-                                v = -0.08 * Math.sin((phase - 0.20) / 0.04 * Math.PI);
-                            } else if (phase >= 0.24 && phase < 0.26) {
-                                v = (phase - 0.24) / 0.02;
-                            } else if (phase >= 0.26 && phase <= 0.75) {
-                                v = 1.0 + (phase - 0.26) * 0.05;
-                            } else if (phase > 0.75 && phase <= 0.77) {
-                                v = 1.03 * (1 - (phase - 0.75) / 0.02);
-                            } else {
-                                v = 0;
-                            }
-                        }
-                        break;
-                    }
-                    case 'autotrigger': {
-                        const pStart = 0.2, pEnd = 0.65;
-                        if (phase >= pStart && phase < pStart + 0.02) {
-                            v = (phase - pStart) / 0.02;
-                        } else if (phase >= pStart + 0.02 && phase <= pEnd) {
-                            v = 0.85 + Math.sin(timeSec * 30) * 0.03;
-                        } else if (phase > pEnd && phase <= pEnd + 0.02) {
-                            v = 0.85 * (1 - (phase - pEnd) / 0.02);
-                        } else {
-                            v = Math.abs(Math.sin(timeSec * 25)) * 0.04;
-                        }
-                        break;
-                    }
-                    case 'doubletrigger': {
-                        if (phase >= 0.15 && phase < 0.40) {
-                            const subP = (phase - 0.15) / 0.25;
-                            if (subP < 0.1) v = subP / 0.1 * 0.8;
-                            else if (subP < 0.8) v = 0.8;
-                            else v = 0.8 * (1 - (subP - 0.8) / 0.2);
-                        } else if (phase >= 0.42 && phase < 0.75) {
-                            const subP2 = (phase - 0.42) / 0.33;
-                            if (subP2 < 0.08) v = subP2 / 0.08 * 1.05;
-                            else if (subP2 < 0.85) v = 1.05;
-                            else v = 1.05 * (1 - (subP2 - 0.85) / 0.15);
-                        } else {
-                            v = 0;
-                        }
-                        break;
-                    }
-                    case 'fighting': {
-                        if (phase >= 0.25 && phase < 0.27) {
-                            v = (phase - 0.25) / 0.02;
-                        } else if (phase >= 0.27 && phase <= 0.75) {
-                            const prog = (phase - 0.27) / 0.48;
-                            v = 1.0 + prog * 0.08 + Math.sin(phase * 40 * Math.PI) * 0.08;
-                        } else if (phase > 0.75 && phase <= 0.77) {
-                            v = 1.1 * (1 - (phase - 0.75) / 0.02);
-                        } else {
-                            v = 0;
-                        }
-                        break;
-                    }
-                    case 'sharkfin': {
-                        if (phase >= 0.20 && phase <= 0.75) {
-                            const prog = (phase - 0.20) / 0.55;
-                            v = Math.pow(prog, 2.5) * 1.08;
-                        } else if (phase > 0.75 && phase <= 0.78) {
-                            v = 1.08 * (1 - (phase - 0.75) / 0.03);
-                        } else {
-                            v = 0;
-                        }
-                        break;
-                    }
-                    case 'normal':
-                    default: {
-                        const pStart = 0.25, pEnd = 0.75, rDur = 0.015, fDur = 0.015;
-                        if (phase >= pStart && phase < pStart + rDur) {
-                            v = (phase - pStart) / rDur;
-                        } else if (phase >= pStart + rDur && phase <= pEnd) {
-                            const pProg = (phase - (pStart + rDur)) / (pEnd - (pStart + rDur));
-                            v = 1.0 + pProg * 0.04;
-                        } else if (phase > pEnd && phase <= pEnd + fDur) {
-                            v = 1.04 * (1 - (phase - pEnd) / fDur);
-                        } else {
-                            v = 0;
-                        }
-                        break;
+	} else {
+                    // ⚡ 임상 모니터 표준: 칼같이 직각에 가까운 네모반듯한 Square 파형
+                    if (phase >= 0.24 && phase < 0.25) {
+                        // Phase II: 순간 수직 상승
+                        v = (phase - 0.24) / 0.01;
+                    } else if (phase >= 0.25 && phase <= 0.72) {
+                        // Phase III: 폐포 평탄부 (수평에 가까운 미세 상향)
+                        const prog = (phase - 0.25) / 0.47;
+                        v = 1.0 + prog * 0.03;
+                    } else if (phase > 0.72 && phase <= 0.73) {
+                        // Phase 0: 순간 수직 급하강
+                        v = 1.03 * (1 - (phase - 0.72) / 0.01);
+                    } else {
+                        v = 0; // Phase I: 흡기 베이스라인 (0)
                     }
                 }
-                return v;
+                return Math.max(0, v);
             }
         }
 
@@ -3056,126 +3229,163 @@ function updateActivePhaseVitalsIfSelected() {
 
                 let y = h / 2; const timeSec = timestamp / 1000;
 
-                if (key === 'ecg') {
-                    const beatDuration = 60 / state.hr; 
-                    const phase = (timeSec % beatDuration) / beatDuration;
-                    const beatIndex = Math.floor(timeSec / beatDuration);
-                    const stOffset = state.st * 0.05; 
-                    const rhythm = state.rhythm || 'normal';
-                    let v = 0;
-                    let baselineY = h * 0.7;
+if (key === 'ecg') {
+                  const beatDuration = 60 / state.hr; 
+                  const phase = (timeSec % beatDuration) / beatDuration;
+                  const beatIndex = Math.floor(timeSec / beatDuration);
+                  const stOffset = state.st * 0.05; 
+                  const rhythm = state.rhythm || 'normal';
+                  let v = 0;
+                  let baselineY = h * 0.7;
 
-                    if (rhythm === 'vf') {
-                        baselineY = h * 0.55;
-                        v = Math.sin(timeSec * 22) * 0.35 + Math.cos(timeSec * 14) * 0.25 + Math.sin(timeSec * 35) * 0.15;
-                    } 
-                    else if (rhythm === 'vt') {
-                        baselineY = h * 0.55;
-                        let vtRate = Math.max(120, state.hr);
-                        let vtPhase = (timeSec % (60 / vtRate)) / (60 / vtRate);
-                        v = Math.sin(vtPhase * Math.PI * 2) * 0.65 - Math.sin(vtPhase * Math.PI * 4) * 0.15;
-                    } 
-                    else if (rhythm === 'afib') {
-                        v = Math.sin(timeSec * 25) * 0.04 + Math.sin(timeSec * 15) * 0.02; 
-                        if (phase >= 0.22 && phase < 0.24) v += 0.9;
-                        else if (phase >= 0.24 && phase < 0.28) v += -0.2 + (phase - 0.24) * 5 * (stOffset + 0.2);
-                        else if (phase >= 0.28 && phase <= 0.4) v += stOffset;
-                        else if (phase > 0.4 && phase <= 0.55) {
-                            const tAmp = (state.tWaveInverted ? -0.2 : 0.15) + (state.st * 0.04);
-                            v += stOffset + Math.sin((phase - 0.4) * (Math.PI / 0.15)) * tAmp;
-                        }
-                    } 
-                    else if (rhythm === 'aflutter') {
-                        v = -0.12 * ((timeSec * 5) % 1.0);
-                        if (phase >= 0.22 && phase < 0.24) v += 0.9;
-                        else if (phase >= 0.24 && phase < 0.28) v += -0.2 + (phase - 0.24) * 5 * (stOffset + 0.2);
-                        else if (phase >= 0.28 && phase <= 0.4) v += stOffset;
-                        else if (phase > 0.4 && phase <= 0.55) {
-                            const tAmp = (state.tWaveInverted ? -0.2 : 0.15) + (state.st * 0.04);
-                            v += stOffset + Math.sin((phase - 0.4) * (Math.PI / 0.15)) * tAmp;
-                        }
-                    } 
-                    else {
-                        let isPVC = false;
-                        if (rhythm === 'pvc' && (Math.sin(beatIndex * 123.45) > 0.8)) isPVC = true;
-                        if (rhythm === 'bigeminy' && (beatIndex % 2 === 1)) isPVC = true;
-                        if (rhythm === 'trigeminy' && (beatIndex % 3 === 2)) isPVC = true;
+                  if (rhythm === 'vf') {
+                      baselineY = h * 0.55;
+                      // 거칠고 불규칙한 세동파 (Coarse VF)
+                      v = Math.sin(timeSec * 22) * 0.35 + Math.cos(timeSec * 14) * 0.25 + Math.sin(timeSec * 35) * 0.15;
+                  } 
+                  else if (rhythm === 'vt' || rhythm === 'pvt' || rhythm === 'uvt') {
+                      baselineY = h * 0.55;
+                      let vtRate = Math.max(150, state.hr);
+                      let vtPhase = (timeSec % (60 / vtRate)) / (60 / vtRate);
+                      // 전형적인 Wide QRS 단형성 심실빈맥 파형
+                      v = Math.sin(vtPhase * Math.PI * 2) * 0.70 - Math.sin(vtPhase * Math.PI * 4) * 0.12;
+                  } 
+                  else if (rhythm === 'afib') {
+                      v = Math.sin(timeSec * 25) * 0.04 + Math.sin(timeSec * 15) * 0.02; 
+                      if (phase >= 0.22 && phase < 0.24) v += 0.9;
+                      else if (phase >= 0.24 && phase < 0.28) v += -0.2 + (phase - 0.24) * 5 * (stOffset + 0.2);
+                      else if (phase >= 0.28 && phase <= 0.4) v += stOffset;
+                      else if (phase > 0.4 && phase <= 0.55) {
+                          const tAmp = (state.tWaveInverted ? -0.2 : 0.15) + (state.st * 0.04);
+                          v += stOffset + Math.sin((phase - 0.4) * (Math.PI / 0.15)) * tAmp;
+                      }
+                  } 
+                  else if (rhythm === 'aflutter') {
+                      v = -0.12 * ((timeSec * 5) % 1.0);
+                      if (phase >= 0.22 && phase < 0.24) v += 0.9;
+                      else if (phase >= 0.24 && phase < 0.28) v += -0.2 + (phase - 0.24) * 5 * (stOffset + 0.2);
+                      else if (phase >= 0.28 && phase <= 0.4) v += stOffset;
+                      else if (phase > 0.4 && phase <= 0.55) {
+                          const tAmp = (state.tWaveInverted ? -0.2 : 0.15) + (state.st * 0.04);
+                          v += stOffset + Math.sin((phase - 0.4) * (Math.PI / 0.15)) * tAmp;
+                      }
+                  } 
+                  else {
+                      let isPVC = false;
+                      if (rhythm === 'pvc' && (Math.sin(beatIndex * 123.45) > 0.8)) isPVC = true;
+                      if (rhythm === 'bigeminy' && (beatIndex % 2 === 1)) isPVC = true;
+                      if (rhythm === 'trigeminy' && (beatIndex % 3 === 2)) isPVC = true;
 
-                        if (isPVC) {
-                            if (phase >= 0.18 && phase < 0.25) v = -0.35 * Math.sin((phase - 0.18) * Math.PI / 0.07);
-                            else if (phase >= 0.25 && phase < 0.35) v = 1.1 * Math.sin((phase - 0.25) * Math.PI / 0.1);
-                            else if (phase >= 0.35 && phase <= 0.6) v = -0.35 * Math.sin((phase - 0.35) * Math.PI / 0.25);
-                        } else {
-                            if (phase > 0.1 && phase < 0.15) v = Math.sin((phase - 0.1) * 20 * Math.PI) * 0.15; 
-                            else if (phase >= 0.22 && phase < 0.24) v = 0.95;  
-                            else if (phase >= 0.24 && phase < 0.28) {
-                                const sTrough = -0.2; const progress = (phase - 0.24) / 0.04;
-                                if (progress < 0.5) v = 0.95 - (progress * 2) * (0.95 - sTrough);
-                                else v = sTrough + ((progress - 0.5) * 2) * (stOffset - sTrough);
-                            }
-                            else if (phase >= 0.28 && phase <= 0.4) v = stOffset; 
-                            else if (phase > 0.4 && phase <= 0.55) {
-                                const baseTAmp = state.tWaveInverted ? -0.2 : 0.15; 
-                                const tAmp = baseTAmp + (state.st * 0.04); 
-                                const theta = (phase - 0.4) * (Math.PI / 0.15);
-                                const smoothBaseline = stOffset * (1 + Math.cos(theta)) / 2;
-                                v = smoothBaseline + Math.sin(theta) * tAmp;
-                            }
-                        }
+                      if (isPVC) {
+                          if (phase >= 0.18 && phase < 0.25) v = -0.35 * Math.sin((phase - 0.18) * Math.PI / 0.07);
+                          else if (phase >= 0.25 && phase < 0.35) v = 1.1 * Math.sin((phase - 0.25) * Math.PI / 0.1);
+                          else if (phase >= 0.35 && phase <= 0.6) v = -0.35 * Math.sin((phase - 0.35) * Math.PI / 0.25);
+                      } else {
+                          if (phase > 0.1 && phase < 0.15) v = Math.sin((phase - 0.1) * 20 * Math.PI) * 0.15; 
+                          else if (phase >= 0.22 && phase < 0.24) v = 0.95;  
+                          else if (phase >= 0.24 && phase < 0.28) {
+                              const sTrough = -0.2; const progress = (phase - 0.24) / 0.04;
+                              if (progress < 0.5) v = 0.95 - (progress * 2) * (0.95 - sTrough);
+                              else v = sTrough + ((progress - 0.5) * 2) * (stOffset - sTrough);
+                          }
+                          else if (phase >= 0.28 && phase <= 0.4) v = stOffset; 
+                          else if (phase > 0.4 && phase <= 0.55) {
+                              const baseTAmp = state.tWaveInverted ? -0.2 : 0.15; 
+                              const tAmp = baseTAmp + (state.st * 0.04); 
+                              const theta = (phase - 0.4) * (Math.PI / 0.15);
+                              const smoothBaseline = stOffset * (1 + Math.cos(theta)) / 2;
+                              v = smoothBaseline + Math.sin(theta) * tAmp;
+                          }
+                      }
+                  }
+                  y = baselineY - (v * h * 0.5); 
+                  ctx.strokeStyle = '#00ff00';
+              }
+              else if (key === 'spo2') {
+                  if (state.rhythm === 'vf' || state.rhythm === 'pvt') {
+                      // ⚡ VF & Pulseless VT: 잔물결 노이즈마저 전혀 없는 완벽한 Flatline (진폭 0)
+                      y = h * 0.8;
+                  } else if (state.rhythm === 'uvt') {
+                      // ⚡ Unstable VT: 정상 진폭의 15~20% 수준인 미세한 저진폭 톱니형 파형
+                      const beatDuration = 60 / state.hr; 
+                      const phase = (timeSec % beatDuration) / beatDuration;
+                      let v = 0;
+                      if (phase < 0.4) v = (phase / 0.4) * 0.18;
+                      else v = 0.18 * (1 - (phase - 0.4) / 0.6);
+                      y = h * 0.8 - (v * h * 0.6);
+                  } else {
+                      // 정상 박동 파형
+                      const beatDuration = 60 / state.hr; 
+                      const phase = (timeSec % beatDuration) / beatDuration;
+                      let v = 0;
+                      if (phase < 0.3) v = Math.sin((phase / 0.3) * (Math.PI / 2)); 
+                      else if (phase < 0.5) v = 1.0 - ((phase - 0.3) / 0.2) * 0.6; 
+                      else v = 0.4 + Math.sin(((phase - 0.5) / 0.5) * Math.PI) * 0.2; 
+                      y = h * 0.8 - (v * h * 0.6);
+                  }
+                  ctx.strokeStyle = '#00ffff';
+              }
+	else if (key === 'etco2') {
+                const effRR = (state.etco2Pattern === 'autotrigger') ? state.rr * 2 : state.rr;
+                const respDuration = (60 / effRR) / 3;
+                const phase = (timeSec % respDuration) / respDuration;
+                const cycleIndex = Math.floor(timeSec / respDuration);
+
+	// ⚡ 현재 상태의 EtCO2를 안전하게 반영 (기본값 35)
+              let activeEtCO2 = parseFloat(state.etco2) || 35;
+
+                let v = 0;
+                if (state.selfBreathing && state.rhythm !== 'vf' && state.rhythm !== 'pvt') {
+                    if (cycleIndex !== lastEtco2Cycle) {
+                        lastEtco2Cycle = cycleIndex;
+                        const pseudoRandom = Math.sin(cycleIndex * 99.17) * 10000;
+                        const randomEtCO2 = 10 + Math.floor((pseudoRandom - Math.floor(pseudoRandom)) * 15);
+                        DOM.valEtCO2.innerText = randomEtCO2;
                     }
-                    y = baselineY - (v * h * 0.5); 
-                    ctx.strokeStyle = '#00ff00';
-                }
-                else if (key === 'spo2') {
-                    const beatDuration = 60 / state.hr; const phase = (timeSec % beatDuration) / beatDuration;
-                    let v = 0;
-                    if (phase < 0.3) v = Math.sin((phase / 0.3) * (Math.PI / 2)); 
-                    else if (phase < 0.5) v = 1.0 - ((phase - 0.3) / 0.2) * 0.6; 
-                    else v = 0.4 + Math.sin(((phase - 0.5) / 0.5) * Math.PI) * 0.2; 
-                    y = h * 0.8 - (v * h * 0.6); ctx.strokeStyle = '#00ffff';
-                }
-                else if (key === 'etco2') {
-                    const effRR = (state.etco2Pattern === 'autotrigger') ? state.rr * 2 : state.rr;
-                    const respDuration = (60 / effRR) / 3;
-                    const phase = (timeSec % respDuration) / respDuration;
-                    const cycleIndex = Math.floor(timeSec / respDuration);
+                    const currentVal = parseInt(DOM.valEtCO2.innerText) || 18;
+                    const breathNoise = Math.sin(cycleIndex * 14.3) * 0.15;
+                    v = CapnographyRenderer.calculate(phase, state.etco2Pattern, state.cleftDepth, timeSec);
+                    const amp = (currentVal / 80) * (1 + breathNoise * 0.2);
+                    y = h * 0.92 - (v * h * 0.9 * amp);
+                } else {
+                    v = CapnographyRenderer.calculate(phase, state.etco2Pattern, state.cleftDepth, timeSec);
 
-                    let v = 0;
-                    if (state.selfBreathing) {
-                        if (cycleIndex !== lastEtco2Cycle) {
-                            lastEtco2Cycle = cycleIndex;
-                            const pseudoRandom = Math.sin(cycleIndex * 99.17) * 10000;
-                            const randomEtCO2 = 10 + Math.floor((pseudoRandom - Math.floor(pseudoRandom)) * 15);
-                            DOM.valEtCO2.innerText = randomEtCO2;
-                        }
-                        const currentVal = parseInt(DOM.valEtCO2.innerText) || 18;
-                        const breathNoise = Math.sin(cycleIndex * 14.3) * 0.15;
-                        v = CapnographyRenderer.calculate(phase, state.etco2Pattern, state.cleftDepth, timeSec);
-                        const amp = (currentVal / 80) * (1 + breathNoise * 0.2);
-                        y = h * 0.92 - (v * h * 0.9 * amp);
-                    } else {
-                        if (DOM.valEtCO2.innerText != state.etco2) {
-                            DOM.valEtCO2.innerText = state.etco2;
-                        }
-                        v = CapnographyRenderer.calculate(phase, state.etco2Pattern, state.cleftDepth, timeSec);
-                        const amp = state.etco2 / 80;
-                        y = h * 0.9 - (v * h * 0.98 * amp);
-                    }
-                    ctx.strokeStyle = '#ffffff';
+                    // ⚡ 6~8 mmHg일 때 바닥에 바짝 붙은 초저진폭 사각파(높이 약 3~4px) 형성
+                    const baselineY = h * 0.92;
+                    const maxWaveHeight = h * 0.75; // 정상 40 mmHg일 때의 최대 높이
+                    const waveH = (activeEtCO2 / 45) * maxWaveHeight * v;
+                    y = baselineY - waveH;
                 }
-                else if (key === 'rr') {
-                    if (state.abpMode) {
-                        const beatDuration = 60 / state.hr; const phase = (timeSec % beatDuration) / beatDuration;
-                        let v = 0;
-                        if (phase < 0.15) v = Math.sin((phase / 0.15) * (Math.PI / 2));
-                        else if (phase < 0.35) v = 1.0 - ((phase - 0.15) / 0.2) * 0.4; 
-                        else if (phase < 0.45) v = 0.6 + Math.sin(((phase - 0.35) / 0.1) * Math.PI) * 0.1;
-                        else v = 0.6 - ((phase - 0.45) / 0.55) * 0.5; 
-                        y = h * 0.85 - (v * h * 0.7); ctx.strokeStyle = '#ff0000';
-                    } else {
-                        const respDuration = (60 / state.rr) / 3; const phase = (timeSec % respDuration) / respDuration;
+                ctx.strokeStyle = '#ffffff';
+            }
+              else if (key === 'rr') {
+                  if (state.abpMode) {
+                      if (state.rhythm === 'vf' || state.rhythm === 'pvt') {
+                          // ⚡ 완전 심정지(무맥): 맥압 소실 완전 Flatline
+                          y = h * 0.85;
+                      } else if (state.rhythm === 'uvt') {
+                          // ⚡ Unstable VT: 붕괴된 혈압 반영 (정상의 25% 미세 파형)
+                          const beatDuration = 60 / state.hr; 
+                          const phase = (timeSec % beatDuration) / beatDuration;
+                          let v = (phase < 0.3) ? (phase / 0.3) * 0.22 : 0.22 * (1 - (phase - 0.3) / 0.7);
+                          y = h * 0.85 - (v * h * 0.7);
+                      } else {
+                          const beatDuration = 60 / state.hr; 
+                          const phase = (timeSec % beatDuration) / beatDuration;
+                          let v = 0;
+                          if (phase < 0.15) v = Math.sin((phase / 0.15) * (Math.PI / 2));
+                          else if (phase < 0.35) v = 1.0 - ((phase - 0.15) / 0.2) * 0.4; 
+                          else if (phase < 0.45) v = 0.6 + Math.sin(((phase - 0.35) / 0.1) * Math.PI) * 0.1;
+                          else v = 0.6 - ((phase - 0.45) / 0.55) * 0.5; 
+                          y = h * 0.85 - (v * h * 0.7);
+                      }
+                      ctx.strokeStyle = '#ff0000';
+                  } else {
+                        const respDuration = (60 / state.rr) / 3; 
+                        const phase = (timeSec % respDuration) / respDuration;
                         const v = Math.sin(phase * 2 * Math.PI);
-                        y = h * 0.5 - (v * h * 0.18); ctx.strokeStyle = '#cccccc';
+                        y = h * 0.5 - (v * h * 0.18); 
+                        ctx.strokeStyle = '#cccccc';
                     }
                 }
                 ctx.lineWidth = 2; ctx.lineTo(scanX, y); ctx.stroke(); lastYs[key] = y;
@@ -3219,8 +3429,9 @@ function updateActivePhaseVitalsIfSelected() {
             }
         }
 
-        function makeResizable(elmnt, resizer, lockAspectRatio = false, onResizeCallback = null) {
-            let startX = 0, startY = 0, initialWidth = 0, initialHeight = 0;
+        function makeResizable(elmnt, resizer, lockAspectRatio = false, onResizeCallback = null, isTopRight = false) {
+	if (!resizer) return;
+            let startX = 0, startY = 0, initialWidth = 0, initialHeight = 0, initialTop = 0, initialRatio = 1;
 
             resizer.addEventListener('pointerdown', resizeStart);
 
@@ -3231,6 +3442,8 @@ function updateActivePhaseVitalsIfSelected() {
                 startY = e.clientY;
                 initialWidth = elmnt.offsetWidth;
                 initialHeight = elmnt.offsetHeight;
+                initialTop = elmnt.offsetTop;
+                initialRatio = initialWidth / initialHeight;   // ⬅️ 추가
 
                 window.addEventListener('pointermove', resizing);
                 window.addEventListener('pointerup', resizeEnd);
@@ -3239,7 +3452,7 @@ function updateActivePhaseVitalsIfSelected() {
             function resizing(e) {
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-                
+
                 let minW = 140;
                 if (elmnt.id === 'controls') minW = 220;
                 if (elmnt.id === 'monitor-wrapper') minW = 260;
@@ -3247,12 +3460,27 @@ function updateActivePhaseVitalsIfSelected() {
                 let newWidth = initialWidth + dx;
                 if (newWidth < minW) newWidth = minW;
 
-                elmnt.style.width = `${newWidth}px`;
-
-                if (!lockAspectRatio) {
-                    let newHeight = initialHeight + dy;
-                    if (newHeight < 60) newHeight = 60;
-                    elmnt.style.height = `${newHeight}px`;
+                if (lockAspectRatio || e.shiftKey) {
+                    // 모니터: 현재 비율 유지 (Shift 누르고 드래그할 때)
+                    newWidth = Math.min(newWidth, window.innerWidth * 0.98);   // ⬅️ 추가
+                    let newHeight = newWidth / initialRatio;                   // ⬅️ 1.6 → initialRatio
+                    if (isTopRight) {
+                        elmnt.style.top = `${initialTop - (newHeight - initialHeight)}px`;
+                    }
+                    elmnt.style.width = `${newWidth}px`;
+                    elmnt.style.height = `${newHeight}px`;                     // ⬅️ 추가
+                } else {
+                    elmnt.style.width = `${newWidth}px`;
+                    if (isTopRight) {
+                        let newHeight = initialHeight - dy;
+                        if (newHeight >= 60) {
+                            elmnt.style.height = `${newHeight}px`;
+                            elmnt.style.top = `${initialTop + dy}px`;
+                        }
+                    } else {
+                        let newHeight = initialHeight + dy;
+                        if (newHeight >= 60) elmnt.style.height = `${newHeight}px`;
+                    }
                 }
 
                 if (onResizeCallback) onResizeCallback();
@@ -3262,6 +3490,112 @@ function updateActivePhaseVitalsIfSelected() {
                 window.removeEventListener('pointermove', resizing);
                 window.removeEventListener('pointerup', resizeEnd);
                 if (onResizeCallback) onResizeCallback();
+            }
+        }
+
+        // ⬅️ 추가 시작: 좌/우 테두리를 잡고 가로만 늘리기
+        function makeEdgeResizable(elmnt, handle, side) {
+            if (!handle) return;
+            let startX = 0, initialLeft = 0, initialWidth = 0;
+
+            handle.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                elmnt.style.zIndex = ++highestZ;
+                startX = e.clientX;
+                initialLeft = elmnt.offsetLeft;
+                initialWidth = elmnt.offsetWidth;
+                elmnt.style.height = `${elmnt.offsetHeight}px`; // 높이 고정 → 가로만 변함
+                window.addEventListener('pointermove', onMove);
+                window.addEventListener('pointerup', onUp);
+            });
+
+            function onMove(e) {
+                const dx = e.clientX - startX;
+                const minW = 260, maxW = window.innerWidth * 0.98;
+                if (side === 'right') {
+                    elmnt.style.width = `${Math.max(minW, Math.min(maxW, initialWidth + dx))}px`;
+                } else {
+                    const newWidth = Math.max(minW, Math.min(maxW, initialWidth - dx));
+                    elmnt.style.width = `${newWidth}px`;
+                    elmnt.style.left = `${initialLeft + (initialWidth - newWidth)}px`; // 오른쪽 끝 고정
+                }
+            }
+            function onUp() {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+            }
+        }
+	// 🟢 좌측 하단/상단 모니터 리사이저 함수 (상하/좌우 독립 조절 가능)
+        function makeMonitorLeftResizable(elmnt, resizer, isTop = false) {
+            if (!resizer) return;
+            let startX = 0, startY = 0, initialWidth = 0, initialHeight = 0, initialLeft = 0, initialTop = 0, initialRatio = 1.6;
+
+            resizer.addEventListener('pointerdown', (e) => {
+                e.stopPropagation();
+                elmnt.style.zIndex = ++highestZ;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialWidth = elmnt.offsetWidth;
+                initialHeight = elmnt.offsetHeight;
+                initialLeft = elmnt.offsetLeft;
+                initialTop = elmnt.offsetTop;
+                initialRatio = initialWidth / initialHeight;
+
+                window.addEventListener('pointermove', onMove);
+                window.addEventListener('pointerup', onUp);
+            });
+
+            function onMove(e) {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                const minW = 260;
+                const maxW = window.innerWidth * 0.98;
+
+                if (e.shiftKey) {
+                    // ⚡ Shift 키를 누르고 드래그 시: 기존처럼 1.6 고정 비율로 크기 조절
+                    let newWidth = initialWidth - dx;
+                    newWidth = Math.max(minW, Math.min(maxW, newWidth));
+                    let newHeight = newWidth / initialRatio;
+
+                    elmnt.style.width = `${newWidth}px`;
+                    elmnt.style.height = `${newHeight}px`;
+                    elmnt.style.left = `${initialLeft + (initialWidth - newWidth)}px`;
+
+                    if (isTop) {
+                        elmnt.style.top = `${initialTop + (initialHeight - newHeight)}px`;
+                    }
+                } else {
+                    // ⚡ 일반 드래그 시: 좌우(dx)와 상하(dy) 모두 자유롭게 조절
+                    // 1) 가로 조절 (왼쪽을 잡고 끄는 것이므로 left 위치도 함께 이동)
+                    let newWidth = initialWidth - dx;
+                    if (newWidth >= minW && newWidth <= maxW) {
+                        elmnt.style.width = `${newWidth}px`;
+                        elmnt.style.left = `${initialLeft + dx}px`;
+                    }
+
+                    // 2) 세로 조절
+                    if (isTop) {
+                        // 좌측 상단(TL): 위로 끌면(dy < 0) 높이 증가, top 위치도 함께 위로 이동
+                        let newHeight = initialHeight - dy;
+                        if (newHeight >= 160) {
+                            elmnt.style.height = `${newHeight}px`;
+                            elmnt.style.top = `${initialTop + dy}px`;
+                        }
+                    } else {
+                        // 좌측 하단(BL): 아래로 끌면(dy > 0) 높이 증가
+                        let newHeight = initialHeight + dy;
+                        if (newHeight >= 160) {
+                            elmnt.style.height = `${newHeight}px`;
+                        }
+                    }
+                }
+            }
+
+            function onUp() {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
             }
         }
 
@@ -3285,42 +3619,93 @@ function updateActivePhaseVitalsIfSelected() {
         makeDraggable(controlsPanel, controlsHeader);
         makeDraggable(qrContainer, qrHeader);
 
-        makeResizable(monitorWrapper, monitorResizer, true);
+        makeResizable(monitorWrapper, monitorResizer, false);
         makeResizable(controlsPanel, controlsResizer, false);
         makeResizable(qrContainer, qrResizer, false, () => {
             renderQRCode();
         });
+	const monitorResizerTR = document.getElementById('monitor-resizer-tr');
+        const controlsResizerTR = document.getElementById('controls-resizer-tr');
+        const qrResizerTR = document.getElementById('qr-resizer-tr');
 
-        ctrlMinBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (controlsBody.style.display === 'none') {
-                controlsBody.style.display = 'flex';
-                controlsResizer.style.display = 'block';
-                controlsPanel.style.height = 'auto';
-                ctrlMinBtn.innerText = '−';
-            } else {
-                controlsBody.style.display = 'none';
-                controlsResizer.style.display = 'none';
-                controlsPanel.style.height = 'auto';
-                ctrlMinBtn.innerText = '+';
-            }
-        });
+        makeResizable(monitorWrapper, monitorResizerTR, false, null, true);
+        makeEdgeResizable(monitorWrapper, document.getElementById('monitor-edge-left'), 'left');    
+        makeEdgeResizable(monitorWrapper, document.getElementById('monitor-edge-right'), 'right');  
+        makeMonitorLeftResizable(monitorWrapper, document.getElementById('monitor-resizer-bl'), false);
+        makeMonitorLeftResizable(monitorWrapper, document.getElementById('monitor-resizer-tl'), true);
+        makeResizable(controlsPanel, controlsResizerTR, false, null, true);
+        makeResizable(qrContainer, qrResizerTR, false, () => { renderQRCode(); }, true);
 
-        qrMinBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (qrBody.style.display === 'none') {
-                qrBody.style.display = 'flex';
-                qrResizer.style.display = 'block';
-                qrContainer.style.height = 'auto';
-                qrMinBtn.innerText = '−';
-                renderQRCode();
-            } else {
-                qrBody.style.display = 'none';
-                qrResizer.style.display = 'none';
-                qrContainer.style.height = 'auto';
-                qrMinBtn.innerText = '+';
-            }
-        });
+	const btnMinVitals = document.getElementById('btn-min-vitals');
+        const vitalSignBody = document.getElementById('vital-sign-body');
+        if (btnMinVitals && vitalSignBody) {
+            btnMinVitals.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const isHidden = (vitalSignBody.style.display === 'none');
+                if (isHidden) {
+                    vitalSignBody.style.display = 'flex';
+                    btnMinVitals.innerText = '−';
+                } else {
+                    vitalSignBody.style.display = 'none';
+                    btnMinVitals.innerText = '+';
+                }
+            });
+        }
+
+	ctrlMinBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        // getComputedStyle로 실제 숨김 여부를 정확히 판별
+        const isCurrentlyHidden = (window.getComputedStyle(controlsBody).display === 'none');
+
+        if (isCurrentlyHidden) {
+            // 🟢 패널 열기 (복원)
+            controlsBody.style.display = 'flex';
+            controlsResizer.style.display = 'block';
+            if (controlsResizerTR) controlsResizerTR.style.display = 'block';
+            controlsPanel.style.height = 'auto';
+            controlsPanel.style.minHeight = '';
+            controlsPanel.style.maxHeight = '94vh';
+            ctrlMinBtn.innerText = '−';
+        } else {
+            // 🟢 패널 접기 (최소화: 높이 관련 인라인 스타일을 강제로 제거하여 헤더만 남김)
+            controlsBody.style.display = 'none';
+            controlsResizer.style.display = 'none';
+            if (controlsResizerTR) controlsResizerTR.style.display = 'none';
+            controlsPanel.style.removeProperty('height');
+            controlsPanel.style.removeProperty('min-height');
+            controlsPanel.style.height = 'auto';
+            controlsPanel.style.maxHeight = 'none';
+            ctrlMinBtn.innerText = '+';
+        }
+    });
+
+	qrMinBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const isCurrentlyHidden = (window.getComputedStyle(qrBody).display === 'none');
+
+        if (isCurrentlyHidden) {
+            qrBody.style.display = 'flex';
+            qrResizer.style.display = 'block';
+            if (qrResizerTR) qrResizerTR.style.display = 'block';
+            qrContainer.style.height = 'auto';
+            qrContainer.style.minHeight = '';
+            qrMinBtn.innerText = '−';
+            renderQRCode();
+        } else {
+            qrBody.style.display = 'none';
+            qrResizer.style.display = 'none';
+            if (qrResizerTR) qrResizerTR.style.display = 'none';
+            qrContainer.style.removeProperty('height');
+            qrContainer.style.removeProperty('min-height');
+            qrContainer.style.height = 'auto';
+            qrMinBtn.innerText = '+';
+        }
+    });
 
         // 📱 모바일로 접속 시(컨트롤러 전용 모드가 아닐 때) QR 코드 창을 기본 최소화 상태로 시작 ('사진 2' 구현)
         if (window.innerWidth <= 768 && role !== 'controller') {
@@ -3353,29 +3738,59 @@ function updateActivePhaseVitalsIfSelected() {
             });
         }
 
-        function closeVideoFullscreen() {
-            presetDOM.videoPlayer.pause();
-            presetDOM.videoPlayer.removeAttribute('src');
-            presetDOM.videoPlayer.load();
-            presetDOM.videoOverlay.style.display = 'none';
+function closeVideoFullscreen(e) {
+          if (e) {
+              e.stopPropagation();
+              e.preventDefault();
+          }
+          const overlay = document.getElementById('video-fullscreen-overlay');
+          const player = document.getElementById('player-fullscreen-video');
 
-            if (currentSessionRef) {
-                currentSessionRef.child('videoEvent').set({
-                    action: 'stop',
-                    timestamp: Date.now()
-                });
-            }
-        }
+          if (player) {
+              player.pause();
+              player.removeAttribute('src');
+              player.load();
+          }
+          if (overlay) {
+              overlay.style.display = 'none';
+          }
 
-        presetDOM.videoPlayer.addEventListener('ended', closeVideoFullscreen);
-        presetDOM.btnCloseVideo.addEventListener('click', closeVideoFullscreen);
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' || e.keyCode === 27) {
-                if (presetDOM.videoOverlay.style.display === 'flex') {
-                    closeVideoFullscreen();
-                }
-            }
-        });
+          if (currentSessionRef) {
+              currentSessionRef.child('videoEvent').set({
+                  action: 'stop',
+                  timestamp: Date.now()
+              });
+          }
+      }
+
+      const overlayEl = document.getElementById('video-fullscreen-overlay');
+      const playerEl = document.getElementById('player-fullscreen-video');
+      const btnCloseEl = document.getElementById('btn-close-video');
+
+      if (playerEl) playerEl.addEventListener('ended', closeVideoFullscreen);
+
+      if (btnCloseEl) {
+          ['click', 'pointerdown', 'touchend'].forEach(evt => {
+              btnCloseEl.addEventListener(evt, closeVideoFullscreen, { capture: true });
+          });
+      }
+
+      // 검은 배경 클릭 시 닫기
+      if (overlayEl) {
+          overlayEl.addEventListener('click', (e) => {
+              if (e.target === overlayEl) closeVideoFullscreen(e);
+          });
+      }
+
+      // 키보드 ESC 닫기
+      window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+              const overlay = document.getElementById('video-fullscreen-overlay');
+              if (overlay && overlay.style.display === 'flex') {
+                  closeVideoFullscreen(e);
+              }
+          }
+      }, true);
 
     </script>
 </body>
