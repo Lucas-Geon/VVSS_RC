@@ -375,49 +375,49 @@
             touch-action: pan-y !important;
         }
 
-       /* 1열 배치로 변경 */
+      /* 1열 배치 (간격 압축) */
         .controls-layout {
             display: flex;
             flex-direction: column;
-            gap: 7px;
+            gap: 4px;
             width: 100%;
             box-sizing: border-box;
         }
 
         .control-group {
             display: flex;
-            flex-direction: row; /* 좌측 Alarm 버튼과 우측 조작 영역을 가로로 배치 */
+            flex-direction: row;
             align-items: stretch;
             width: 100%;
-            gap: 6px;
+            gap: 5px;
             min-width: 0;
             background: rgba(255, 255, 255, 0.03);
-            padding: 5px 6px;
-            border-radius: 6px;
+            padding: 3px 5px;
+            border-radius: 5px;
             box-sizing: border-box;
         }
         .control-right-wrap {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            gap: 3px;
+            justify-content: center;
+            gap: 1px;
             min-width: 0;
         }
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; gap: 4px; }
-        .input-row label { font-size: 11px; margin: 0; font-weight: 600; white-space: nowrap; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; gap: 4px; line-height: 1.1; }
+        .input-row label { font-size: 10.5px; margin: 0; font-weight: 600; white-space: nowrap; }
 
-        /* 🟡 노란색 정사각형 Alarm 버튼 스타일 */
-        .btn-vital-alarm {
+        /* 🟡 노란색 Alarm 버튼 (높이 압축에 맞춘 슬림 직사각형) */
+	.btn-vital-alarm {
             background-color: #ffc107;
             color: #000000;
             border: 1px solid #ffdb4d;
-            border-bottom: 3px solid #c79100;
-            border-radius: 6px;
-            width: 46px;
+            border-bottom: 2px solid #c79100;
+            border-radius: 5px;
+            width: 42px;
             padding: 0;
-            font-size: 11px;
-            font-weight: 800;
+            font-size: 10.5px;
+            font-weight: bold;
             cursor: pointer;
             flex-shrink: 0;
             display: flex;
@@ -428,19 +428,19 @@
         .btn-vital-alarm:hover { background-color: #ffca2c; }
         .btn-vital-alarm:active { transform: scale(0.93); background-color: #e0a800; }
 
-        /* 우측 인라인 체크박스 (DBP sync, ABP, T-Wave Inv, Self Breathing) */
+        /* 우측 인라인 체크박스 */
         .inline-chk-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             margin-left: auto;
-            margin-right: 4px;
+            margin-right: 3px;
         }
         .inline-chk-label {
             display: flex;
             align-items: center;
-            gap: 3px;
-            font-size: 10.5px !important;
+            gap: 2px;
+            font-size: 10px !important;
             font-weight: bold !important;
             cursor: pointer;
             margin: 0;
@@ -448,34 +448,34 @@
         .inline-chk-label input[type="checkbox"] {
             margin: 0;
             cursor: pointer;
-            transform: scale(1.1);
+            transform: scale(1.0);
         }
 
         .slider-row {
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin: 1px 0;
+            gap: 5px;
+            margin: 0;
             width: 100%;
             box-sizing: border-box;
         }
-.slider-row input[type="range"] {
+        .slider-row input[type="range"] {
             flex: 1;
             min-width: 0;
-            margin: 0 4px;
+            margin: 0 3px;
             cursor: pointer;
-            height: 14px;
-            touch-action: pan-y; /* 세로 스와이프는 무조건 부모 패널 스크롤로 넘김 */
+            height: 12px;
+            touch-action: pan-y;
         }
-        /* '-' / '+' 버튼 1.5배 확대 (18px -> 27px) */
+        /* '-' / '+' 버튼 가로 폭은 유지하고 세로 높이만 슬림화 (27px -> 20px) */
         .step-btn {
             background: #444;
             color: #fff;
             border: 1px solid #666;
-            border-radius: 5px;
+            border-radius: 4px;
             width: 27px;
-            height: 27px;
-            font-size: 16px;
+            height: 20px;
+            font-size: 15px;
             font-weight: bold;
             line-height: 1;
             cursor: pointer;
